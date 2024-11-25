@@ -1,10 +1,10 @@
-import smbus2
 import RPi.GPIO as GPIO
+import smbus2
 import time
 
 # I2C Configuration
 I2C_BUS = 1  # Typically 1 on Raspberry Pi
-MCP23017_ADDRESS = 0x20  # Default I2C address of MCP23017 (can be adjusted via address pins)
+MCP23017_ADDRESS = 0x24  # 24, 26, 27
 
 # MCP23017 Registers
 IODIRA = 0x00  # I/O Direction Register for Port A
