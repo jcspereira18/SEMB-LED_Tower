@@ -5,7 +5,10 @@
 
 // I2C Configuration
 #define I2C_BUS 1  // Normalmente 1 no Raspberry Pi
-#define MCP23017_ADDRESS 0x24  // Endereço do MCP23017
+#define MCP23017_ADDRESS_1 0x24  // Endereço do MCP23017
+#define MCP23017_ADDRESS_2 0x26
+#define MCP23017_ADDRESS_3 0x27 
+
 
 // MCP23017 Registers
 #define IODIRA 0x00  // Registro de direção do Port A
@@ -30,7 +33,7 @@ void setupExpander(int fd) {
 }
 
 // Função para configurar GPIO do MCP23017
-void setGPIO(int fd, char port, uint8_t value) {
+void setGPIO_expander(int fd, char port, uint8_t value) {
     if (port == 'A') {
         wiringPiI2CWriteReg8(fd, OLATA, value);
     } else if (port == 'B') {
@@ -41,7 +44,7 @@ void setGPIO(int fd, char port, uint8_t value) {
 }
 
 // Configuração inicial do GPIO do 74HC164
-void setupGPIOPins() {
+void setupGPIO_shifter() {
     wiringPiSetupGpio();  // Usa o esquema BCM
     pinMode(DATA_PIN, OUTPUT);
     pinMode(CLOCK_PIN, OUTPUT);
@@ -69,27 +72,64 @@ void shiftRegisterCycle() {
 
 int main() {
     // Inicializar o barramento I2C
-    int fd = wiringPiI2CSetup(MCP23017_ADDRESS);
-    if (fd == -1) {
+    int fd_1 = wiringPiI2CSetup(MCP23017_ADDRESS_1);
+    if (fd_1 == -1) {
+        std::cerr << "Erro ao inicializar I2C.\n";
+        return -1;
+    }
+
+    int fd_2 = wiringPiI2CSetup(MCP23017_ADDRESS_2);
+    if (fd_2 == -1) {
+        std::cerr << "Erro ao inicializar I2C.\n";
+        return -1;
+    }
+
+    int fd_3 = wiringPiI2CSetup(MCP23017_ADDRESS_3);
+    if (fd_3 == -1) {
         std::cerr << "Erro ao inicializar I2C.\n";
         return -1;
     }
 
     // Configurar o MCP23017
-    setupExpander(fd);
+    setupExpander(fd_1);
+    setupExpander(fd_2);
+    setupExpander(fd_3);
 
-    // Exemplo: Ativar todos os LEDs conectados ao Port A
-    setGPIO(fd, 'A', 0xFF);  // Configurar todos os pinos do Port A como HIGH
-    // Exemplo: Desativar todos os LEDs conectados ao Port B
-    setGPIO(fd, 'B', 0x00);  // Configurar todos os pinos do Port B como LOW
+    setGPIO_expander(fd_1, 'A', 0xFF);  // Configurar todos os pinos do Port A como HIGH
+    setGPIO_expander(fd_1, 'B', 0x00);  // Configurar todos os pinos do Port A como HIGH
+    
+    setGPIO_expander(fd_2, 'A', 0x00);  // Configurar todos os pinos do Port A como HIGH
+    setGPIO_expander(fd_2, 'B', 0x00);  // Configurar todos os pinos do Port A como HIGH
+    
+    setGPIO_expander(fd_3, 'A', 0x00);  // Configurar todos os pinos do Port A como HIGH
+    setGPIO_expander(fd_3, 'B', 0x00);  // Configurar todos os pinos do Port B como LOW
+
+
+
 
     try {
-        setupGPIOPins();
-        while (true) {
-            std::cout << "Iniciando um novo ciclo...\n";
-            shiftRegisterCycle();
-            sleep(1);  // Espera 1 segundo antes do próximo ciclo
-        }
+        setupGPIO_shifter();
+        //while (true) {
+        std::cout << "Iniciando um novo ciclo...\n";
+        //shiftRegisterCycle();
+        sleep(1);  // Espera 1 segundo antes do próximo ciclo
+        //}
+
+        
+        uint8_t value = 1 << 2;  // Bit shift para criar um LED aceso em movimento
+        setGPIO_expander(fd_1, 'A', value); //2, 3, 4, 5, 6, 7
+        setGPIO_expander(fd_1, 'B', value); // 0, 1, 2, 3, 4, 5
+
+        setGPIO_expander(fd_2, 'A', value);
+        setGPIO_expander(fd_2, 'B', value);
+
+        setGPIO_expander(fd_3, 'A', value);
+        setGPIO_expander(fd_3, 'B', value);
+
+        
+        printf("test\n");
+        usleep(1000000);  // 200ms
+
     } catch (...) {
         std::cout << "Saindo do programa.\n";
         digitalWrite(DATA_PIN, LOW);
@@ -97,11 +137,12 @@ int main() {
     }
 
     // Exemplo: Criar efeito "chasing" no Port A
-    for (int i = 0; i < 8; ++i) {
-        uint8_t value = 1 << i;  // Bit shift para criar um LED aceso em movimento
-        setGPIO(fd, 'A', value);
-        usleep(200000);  // 200ms
-    }
+    //for (int i = 0; i < 8; ++i) {
+    //uint8_t value = 1 << 0;  // Bit shift para criar um LED aceso em movimento
+    //setGPIO_expander(fd, 'A', value);
+    //printf("test\n");
+    //usleep(1000000);  // 200ms
+    //}
 
     return 0;
 }
