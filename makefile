@@ -1,3 +1,6 @@
 # -*- Makefile -*-
 all:
-	g++ ledtower.cpp lwiringPi -o led_tower
+	g++ led_tower.cpp -lwiringPi -o led_tower
+
+run:
+	./led_tower
