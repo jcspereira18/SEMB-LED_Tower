@@ -3,7 +3,7 @@
 
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
-
+#include <stdint.h>
 // I2C Configuration
 #define MCP23017_ADDRESS_1 0x24
 #define MCP23017_ADDRESS_2 0x26
