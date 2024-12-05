@@ -38,8 +38,14 @@ void initExpander(
     }
 
     // Settings ports in expander as outputs
-    wiringPiI2CWriteReg8(expander->fd, IOdirA, InOutType);
-    wiringPiI2CWriteReg8(expander->fd, IOdirB, InOutType);
+    if(wiringPiI2CWriteReg8(expander->fd, IOdirA, InOutType) == -1) {
+        printf("[ERROR] - Cannot set default expander type to IOdirA\n");
+        return;
+    }
+    if(wiringPiI2CWriteReg8(expander->fd, IOdirB, InOutType) == -1) {
+        printf("[ERROR] - Cannot set default expander type to IOdirB\n");
+        return;
+    }
 
     // Set ports outputs to initial values
     setExpanderVal(expander, (uint16_t(InitialValueGPB) << 8) || InitialValueGPA);
