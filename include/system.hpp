@@ -56,6 +56,7 @@ typedef struct{
 typedef struct{
     int dataPin;
     int clockPin;
+    uint16_t data;
 } Shifter;
 
 typedef struct{

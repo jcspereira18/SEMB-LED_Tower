@@ -57,25 +57,30 @@ void initExpander(
 void initShifter(
         Shifter* shifter,
         uint16_t dataPin,
-        uint16_t clockPin){
+        uint16_t clockPin,
+        uint16_t initialData){
 
     if(shifter == NULL){
         printf("[ERROR] - Invalid parameter while initializing shifter\n");
         return;
     }
+
     shifter->dataPin = dataPin;
     shifter->clockPin = clockPin;
-    
+
     if(wiringPiSetupGpio() == -1) {
         printf("[ERROR] - Cannot initialize shifter\n");
         return;
     }
 
-    pinMode(dataPin, OUTPUT);
-    pinMode(clockPin, OUTPUT);
+    pinMode(shifter->dataPin, OUTPUT);
+    pinMode(shifter->clockPin, OUTPUT);
+    pinMode(shifter->dataPin, LOW);
+    pinMode(shifter->clockPin, LOW);
 
-    pinMode(dataPin, LOW);
-    pinMode(clockPin, LOW);
+    // Assumming it starts with 0
+    //setShifterVal(shifter, initialData);
+    // printf("[INFO] - Shifter has the correct initial value\n");
 
     return;
 }
@@ -85,17 +90,21 @@ void initCubeSystem(CubeSystem* system){
         printf("[ERROR] - Invalid parameter while initializing cube system\n");
         return;
     }
+    printf("[INFO] - Starting initialization of cubeSystem\n");
     // initialize Cube with 0's
     memset(system->Cube.ledValues, 0, sizeof(system->Cube.ledValues));
     memset(system->Cube.toUpdateVal, 0, sizeof(system->Cube.toUpdateVal));
-
+    
+    printf("[INFO] - Done initializing ledCubeArrays\n");
     // initialize expanders
     initExpander(&system->Expander1, MCP23017_I2C_ADDRESS_1, OUTPUTTYPE, IODIRA, IODIRB, GPIOA, GPIOB, OLATA, OLATB, 0x00, 0x00);
     initExpander(&system->Expander2, MCP23017_I2C_ADDRESS_2, OUTPUTTYPE, IODIRA, IODIRB, GPIOA, GPIOB, OLATA, OLATB, 0x00, 0x00);
     initExpander(&system->Expander3, MCP23017_I2C_ADDRESS_3, OUTPUTTYPE, IODIRA, IODIRB, GPIOA, GPIOB, OLATA, OLATB, 0x00, 0x00);
 
+    printf("[INFO] - Done initializing all expanders\n");
     // initialize shifters
-    initShifter(&system->Shifter1, DATA_PIN, CLOCK_PIN);
+    initShifter(&system->Shifter1, DATA_PIN, CLOCK_PIN, 0x0000);
+    printf("[INFO] - Shifter has been initialized correctly\n");
     //initShifter(&system->Shifter2, DATA_PIN, CLOCK_PIN);
     return;
 }
@@ -117,7 +126,7 @@ void setExpanderVal(Expander* expander, uint16_t data){
 
 void printBinary(uint16_t value){
     for(int i = 15; i >= 0; i--){
-        printf("%d", (value << i) & 1);
+        printf("%d", (value >> i) & 1);
     }
     printf("\n");
     return;
@@ -128,14 +137,36 @@ void setShifterVal(Shifter* shifter, uint16_t data){
         printf("[ERROR] - Invalid parameter in setShifterVal\n");
         return;
     }
-    printf("data: %d \n", data);
-    if (data >=16 || data <= 0){
+    if (data > 0b1111'1111'1111'1111 || data < 0b0000'0000'0000'0000){
         printf("[ERROR] - Trying to write invalid data on Shifter\n");
+        printf("[ERROR] - Trying to write: ");
+        printBinary(data);
         return;
     }
-    digitalWrite(shifter->dataPin, data);
-    printf("[INFO] - Successfully wrote to shifter. Data: ");
-    printBinary(data);
+//    int index = 0;
+//    bool resultBool = 0;
+//    for(int i = 0; i < 16; i++){
+//        resultBool = (data & (1 << (7 - i))) ? HIGH : LOW;
+//        printf("[INFO] - resultBool value: %d\n",resultBool);
+//        digitalWrite(shifter->dataPin, resultBool);
+//        clockPulse(shifter, 100);
+//    }
+//    shifter->data = data;
+//    printf("[INFO] - Value in shifter->data: %d\n", shifter->data);
+//    printf("[INFO] - Successfully wrote to shifter. Data: ");
+//    printBinary(shifter->data);
+//
+    printf("dataPin value: %d", shifter->dataPin);
+    digitalWrite(shifter->dataPin, HIGH);
+    clockPulse(shifter, 1000);
+    clockPulse(shifter, 1000);
+    clockPulse(shifter, 1000);
+    clockPulse(shifter, 1000);
+    clockPulse(shifter, 1000);
+    clockPulse(shifter, 1000);
+    clockPulse(shifter, 1000);
+    clockPulse(shifter, 1000);
+
     return;
 }
 
@@ -144,10 +175,8 @@ void clockPulse(Shifter* shifter, useconds_t utime){
         printf("[ERROR] - Invalid parameter in clockPulse\n");
         return;
     }
-
     digitalWrite(shifter->clockPin, HIGH);
     usleep(utime);
     digitalWrite(shifter->clockPin, LOW);
-    usleep(utime);
     return;
 }

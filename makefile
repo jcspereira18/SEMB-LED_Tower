@@ -10,8 +10,8 @@ FINAL_DIR = /led_tower/build
 CPPFILES = $(wildcard $(SRC_DIR)/*.cpp)
 HPPFILES = $(wildcard $(INC_DIR)/*.hpp)
 TARGET = $(BUILD_DIR)/main
-IP2 = 10.227.113.138
-IP = 192.168.181.94
+IP = 10.227.113.138
+IP2 = 192.168.181.94
 
 # Send the source files to the Raspberry Pi project directory
 # These functions are meant to be executed through ssh
