@@ -11,95 +11,98 @@ void* createCubeSystem(void* args){
     return nullptr;
 }   
 
+void* globalReset(void* args){
+    CubeSystem* cubeSystem = (CubeSystem*)args;
+
+    setExpanderVal(&cubeSystem->Expander1, 0x0000);
+    setExpanderVal(&cubeSystem->Expander2, 0x0000);
+    setExpanderVal(&cubeSystem->Expander3, 0x0000);
+    
+    setShifterVal(&cubeSystem->Shifter1, 0x00);
+
+    return nullptr;
+}
+
+
+void* customPosition(void* args){
+    CubeSystem* cubeSystem = (CubeSystem*)args;
+
+    setExpanderVal(&cubeSystem->Expander1, 0x00FF);
+    setExpanderVal(&cubeSystem->Expander2, 0x0000);
+    setExpanderVal(&cubeSystem->Expander3, 0x0000);
+
+    setShifterVal(&cubeSystem->Shifter1, 0x01);
+    return nullptr;
+}
+
+
+void* debugPrints(void* args){
+    CubeSystem* cubeSystem = (CubeSystem*)args;
+    int timeS = 0;
+    while(1){
+        printf("\nReadings from second: %d\n",timeS);
+        printf("Expander1 ~ valueGPA: %d - valueGPB: %d\n", cubeSystem->Expander1.valueGPA, cubeSystem->Expander1.valueGPB);
+        printf("Expander2 ~ valueGPA: %d - valueGPB: %d\n", cubeSystem->Expander2.valueGPA, cubeSystem->Expander2.valueGPB);
+        printf("Expander3 ~ valueGPA: %d - valueGPB: %d\n", cubeSystem->Expander3.valueGPA, cubeSystem->Expander3.valueGPB);
+        printf("Shifter ~ DataPin: %d\n", cubeSystem->Shifter1.dataPin);
+        timeS++;
+        usleep(1'000'000);
+    }
+    return nullptr;
+}
+
+void* cycleShifter(void* args){
+    CubeSystem* cubeSystem = (CubeSystem*)args;
+
+    useconds_t delayBetweenCycles = 10'000; // 10 ms
+    time_t startTime = time(NULL),
+           currentTime = time(NULL),
+           totalTime = 10;
+
+    while(1){
+        currentTime = time(NULL);
+        clockPulse(&cubeSystem->Shifter1, delayBetweenCycles);
+
+        if(difftime(currentTime, startTime) >= totalTime){
+            break;
+        }
+    usleep(5000);
+
+    }
+    return nullptr;
+}
+
 int main() {
     CubeSystem cubeSystem;
     pthread_t initCubeSystemThread;
-
     if(pthread_create(&initCubeSystemThread, NULL, createCubeSystem, (void*)&cubeSystem) != 0) {
         printf("[ERROR] - Cannot create cube system\n");
         return 0;
     }
-
     pthread_join(initCubeSystemThread, NULL); // wait thread to finish
+
+    // TODO:
+    pthread_t globalResetThread;
+
+    pthread_t debugPrintsThread;
+    if(pthread_create(&debugPrintsThread, NULL, debugPrints, (void*)&cubeSystem) != 0) {
+        printf("[ERROR] - 1\n");
+        return 0;
+    }
+
+    pthread_t customPositionThread, cycleShifterThread;
+    if(pthread_create(&customPositionThread, NULL, customPosition, (void*)&cubeSystem) != 0) {
+        printf("[ERROR] - 1\n");
+        return 0;
+    }
+    if(pthread_create(&cycleShifterThread, NULL, cycleShifter, (void*)&cubeSystem) != 0) {
+        printf("[ERROR] - 2\n");
+        return 0;
+    }
+    pthread_join(customPositionThread, NULL);
+    printf("Completed custom position\n");
+    pthread_join(cycleShifterThread, NULL);
 
     printf("Program runned all tasks. Exiting now.\n");
     return 0;
 }
-
-// TODO: Descobrir qual é a associação entre A e B -> andares ou colunas?
-//void* showCubeLedStatus(void* arg){
-//    Cube *ledCube = (Cube*)arg;
-//    while(1){
-//        for(int andar = 0; andar < ANDARES; andar++){
-//            incrementShiftVal(&ledCube->shifterVal); // start shifter with 0 and cycle to andares
-//            
-//            for(int coluna = 0; coluna < COLUNAS; coluna++){
-//                incrementExpanderVal(&ledCube->expanderAVal); // assuming A as columns
-//
-//                for(int linha = 0; linha < LINHAS; linha++){
-//                    incrementExpanderVal(&ledCube->expanderBVal); // assuming B as lines
-//
-//                    if(ledCube->ledValues[andar][coluna][linha] == 1){
-//                        printf("Turning on ledCube[%d][%d][%d]\n", andar, coluna, linha);
-//                        a
-//
-//                        
-//                    }
-//                }
-//            }
-//        }
-//        // maybe we will need to reset the expanders + shifter values to 0 in the end...
-//        usleep(50'000); // 50 ms sleep  TODO: Tune this value! 
-//    }
-//}
-//        unsigned char led[ANDARES][COLUNAS][LINHAS] = *()
-//        unsigned char newLedState[ANDARES][COLUNAS][LINHAS],
-//        unsigned char* expanderAValue,
-//        unsigned char* expanderBValue,
-//        unsigned char* shifterValue
-//
-//    for(int andar = 0; andar < ANDARES; andar++){
-//        // start with shifter 0 and cycle to andares
-//        incrementShiftVal(shifterValue);
-//
-//        for(int coluna = 0; coluna < COLUNAS; coluna++){
-//            incrementExpanderVal(expanderAValue); // Assumindo A como colunas
-//
-//            for(int linha = 0; linha < LINHAS; linha++){
-//                incrementExpanderVal(expanderBValue); // Assumindo B como andares
-//
-//                if(led[andar][coluna][linha] != newLedState[andar][coluna][linha]){
-//                    printf("Updating value = cube[%d][%d][%d][Andar][Coluna][Linha]"
-//                            ,andar, coluna, linha);
-//                    led[andar][coluna][linha] = newLedState[andar][coluna][linha];
-//                }
-//            }
-//        }
-//    }
-//    
-//    return nullptr;
-//}
-
-// TODO: função para remover andares imaginários
-
-// Test thread
-//void* loopFunction(void* arg){
-//    Cube led_cube = {0}; // Initialize all members with 0
-//
-//    time_t startTime = time(NULL), currentTime;
-//    
-//    while(1){
-//        currentTime = time(NULL);
-//        printf("Starting new cycle\n");
-//
-//
-//        if(difftime(currentTime, startTime) >= 15){ // 15 seconds of testing
-//            printf("LOOPTIME seconds have been passed. Exiting loop\n");
-//            startTime = time(NULL);
-//            break;
-//        }
-//    }
-//    return nullptr;
-//}
-
-

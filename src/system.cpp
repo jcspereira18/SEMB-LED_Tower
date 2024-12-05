@@ -3,6 +3,7 @@
 
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
+#include <unistd.h>
 
 #include "../include/system.hpp"
 
@@ -82,9 +83,28 @@ void initCubeSystem(CubeSystem* system){
 }
 
 void setExpanderVal(Expander* expander, uint16_t data){
-    wiringPiI2CWriteReg16(expander->fd, expander->portGPIOA, data);
+    // update expander values 
+    expander->valueGPA = data & 0xFF;
+    expander->valueGPB = (data >> 8) & 0xFF;
+
+    if(wiringPiI2CWriteReg16(expander->fd, expander->portGPIOA, data) == -1){
+        printf("Error \n");
+    }
 }
 
-void shiftCycleCLK(Shifter* shifter){
+void setShifterVal(Shifter* shifter, uint16_t data){
+    printf("data: %d \n", data);
+    if (data >=16 || data <= 0){
+        printf("[ERROR] - Trying to write invalid data on Shifter\n");
+        return;
+    }
+    digitalWrite(shifter->dataPin, data);
+    return;
+}
 
+void clockPulse(Shifter* shifter, useconds_t utime){
+    digitalWrite(shifter->clockPin, HIGH);
+    usleep(utime);
+    digitalWrite(shifter->clockPin, LOW);
+    usleep(utime);
 }

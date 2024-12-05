@@ -3,6 +3,7 @@
 
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
+#include <unistd.h>
 
 #define ANDARES 11 // 6 reais + 5 imaginários
 #define COLUNAS 6
@@ -63,11 +64,13 @@ typedef struct{
     Expander Expander2; // U2
     Expander Expander3; // U3
     Shifter Shifter1;   // U4
-    Shifter Shifter2;   // U5
+//   Shifter Shifter2;   // U5
 } CubeSystem;
 
 
 void initCubeSystem(CubeSystem* system);
 void setExpanderVal(Expander* expander, uint16_t data);
+void setShifterVal(Shifter* shifter, uint16_t data);
+void clockPulse(Shifter* shifter, useconds_t utime);
 
 #endif // SHIFTREGS_HPP
