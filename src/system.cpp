@@ -19,8 +19,16 @@ void initExpander(
         uint16_t portOutLatchB,
         uint8_t InitialValueGPA,
         uint8_t InitialValueGPB){
+    if(expander == NULL){
+        printf("[ERROR] - Invalid parameter while initializing expander\n");
+        return;
+    }
 
     expander->fd = wiringPiI2CSetup(I2Caddress);
+    if(expander->fd == -1){
+        printf("[ERROR] - Cannot initialize expander with %d Address\n", I2Caddress);
+        return;
+    }
     expander->type = InOutType;
     expander->IOdirA = IOdirA;
     expander->IOdirB = IOdirB;
@@ -31,11 +39,6 @@ void initExpander(
     expander->portOutLatchB = portOutLatchB;
     expander->valueGPA = InitialValueGPA;
     expander->valueGPB = InitialValueGPB;
-
-    if(expander->fd == -1){
-        printf("[ERROR] - Cannot initialize expander with %d Address\n", I2Caddress);
-        return;
-    }
 
     // Settings ports in expander as outputs
     if(wiringPiI2CWriteReg8(expander->fd, IOdirA, InOutType) == -1) {
@@ -56,6 +59,10 @@ void initShifter(
         uint16_t dataPin,
         uint16_t clockPin){
 
+    if(shifter == NULL){
+        printf("[ERROR] - Invalid parameter while initializing shifter\n");
+        return;
+    }
     shifter->dataPin = dataPin;
     shifter->clockPin = clockPin;
     
@@ -74,6 +81,10 @@ void initShifter(
 }
 
 void initCubeSystem(CubeSystem* system){
+    if(system == NULL){
+        printf("[ERROR] - Invalid parameter while initializing cube system\n");
+        return;
+    }
     // initialize Cube with 0's
     memset(system->Cube.ledValues, 0, sizeof(system->Cube.ledValues));
     memset(system->Cube.toUpdateVal, 0, sizeof(system->Cube.toUpdateVal));
@@ -86,31 +97,57 @@ void initCubeSystem(CubeSystem* system){
     // initialize shifters
     initShifter(&system->Shifter1, DATA_PIN, CLOCK_PIN);
     //initShifter(&system->Shifter2, DATA_PIN, CLOCK_PIN);
+    return;
 }
 
 void setExpanderVal(Expander* expander, uint16_t data){
-    // update expander values 
+    if(expander == NULL){
+        printf("[ERROR] - Invalid parameter while setting values to expander\n");
+        return;
+    }
+    
     expander->valueGPA = data & 0xFF;
     expander->valueGPB = (data >> 8) & 0xFF;
 
     if(wiringPiI2CWriteReg16(expander->fd, expander->portGPIOA, data) == -1){
         printf("Error \n");
     }
+    return;
+}
+
+void printBinary(uint16_t value){
+    for(int i = 15; i >= 0; i--){
+        printf("%d", (value << i) & 1);
+    }
+    printf("\n");
+    return;
 }
 
 void setShifterVal(Shifter* shifter, uint16_t data){
+    if(shifter == NULL){
+        printf("[ERROR] - Invalid parameter in setShifterVal\n");
+        return;
+    }
     printf("data: %d \n", data);
     if (data >=16 || data <= 0){
         printf("[ERROR] - Trying to write invalid data on Shifter\n");
         return;
     }
     digitalWrite(shifter->dataPin, data);
+    printf("[INFO] - Successfully wrote to shifter. Data: ");
+    printBinary(data);
     return;
 }
 
 void clockPulse(Shifter* shifter, useconds_t utime){
+    if(shifter == NULL){
+        printf("[ERROR] - Invalid parameter in clockPulse\n");
+        return;
+    }
+
     digitalWrite(shifter->clockPin, HIGH);
     usleep(utime);
     digitalWrite(shifter->clockPin, LOW);
     usleep(utime);
+    return;
 }
