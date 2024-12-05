@@ -11,10 +11,10 @@ void* customPosition(void* args){
     CubeSystem* cubeSystem = (CubeSystem*)args;
 
     setExpanderVal(&cubeSystem->Expander1, 0b0000'0000'0000'0000); // U1
-    setExpanderVal(&cubeSystem->Expander2, 0b1111'1111'1111'1111); // U2
-    setExpanderVal(&cubeSystem->Expander3, 0b1111'1111'1111'1111); // U3
+    setExpanderVal(&cubeSystem->Expander2, 0b0000'0000'0000'0000); // U2
+    setExpanderVal(&cubeSystem->Expander3, 0b0000'0000'0000'0000); // U3 LOGICA INVERSAAAAAAAAAAAAAAAAAA
 
-    setShifterVal(&cubeSystem->Shifter1, 0b0000'0000'0000'0001); // U4_QA HIGH // Handling U4 and U5
+    setShifterVal(&cubeSystem->Shifter1, 0b1111'1111'1111'1111); // U4_QA HIGH // Handling U4 and U5
     printf("[INFO] - Successfully set the custom position\n");
     return nullptr;
 }

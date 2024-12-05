@@ -68,15 +68,16 @@ void initShifter(
     shifter->dataPin = dataPin;
     shifter->clockPin = clockPin;
 
-    if(wiringPiSetupGpio() == -1) {
-        printf("[ERROR] - Cannot initialize shifter\n");
-        return;
-    }
-
+//    if(wiringPiSetupGpio() == -1) {
+//        printf("[ERROR] - Cannot initialize shifter\n");
+//        return;
+//    }
+    wiringPiSetupGpio();
+    printf("dataPin: %d\n clockPin: %d\nOutput: %d\n LOW: %d\n", shifter->dataPin, shifter->clockPin, OUTPUT, LOW);
     pinMode(shifter->dataPin, OUTPUT);
     pinMode(shifter->clockPin, OUTPUT);
-    pinMode(shifter->dataPin, LOW);
-    pinMode(shifter->clockPin, LOW);
+    digitalWrite(shifter->dataPin, LOW);
+    digitalWrite(shifter->clockPin, LOW);
 
     // Assumming it starts with 0
     //setShifterVal(shifter, initialData);
@@ -143,29 +144,20 @@ void setShifterVal(Shifter* shifter, uint16_t data){
         printBinary(data);
         return;
     }
-//    int index = 0;
-//    bool resultBool = 0;
-//    for(int i = 0; i < 16; i++){
-//        resultBool = (data & (1 << (7 - i))) ? HIGH : LOW;
-//        printf("[INFO] - resultBool value: %d\n",resultBool);
-//        digitalWrite(shifter->dataPin, resultBool);
-//        clockPulse(shifter, 100);
-//    }
-//    shifter->data = data;
-//    printf("[INFO] - Value in shifter->data: %d\n", shifter->data);
-//    printf("[INFO] - Successfully wrote to shifter. Data: ");
-//    printBinary(shifter->data);
-//
+    int index = 0;
+    bool resultBool = 0;
+    for(int i = 0; i < 16; i++){
+        resultBool = (data & (1 << (15 - i))) ? HIGH : LOW;
+        printf("[INFO] - resultBool value: %d\n",resultBool);
+        digitalWrite(shifter->dataPin, resultBool);
+        clockPulse(shifter, 100);
+    }
+    shifter->data = data;
+    printf("[INFO] - Value in shifter->data: %d\n", shifter->data);
+    printf("[INFO] - Successfully wrote to shifter. Data: ");
+    printBinary(shifter->data);
+
     printf("dataPin value: %d", shifter->dataPin);
-    digitalWrite(shifter->dataPin, HIGH);
-    clockPulse(shifter, 1000);
-    clockPulse(shifter, 1000);
-    clockPulse(shifter, 1000);
-    clockPulse(shifter, 1000);
-    clockPulse(shifter, 1000);
-    clockPulse(shifter, 1000);
-    clockPulse(shifter, 1000);
-    clockPulse(shifter, 1000);
 
     return;
 }
