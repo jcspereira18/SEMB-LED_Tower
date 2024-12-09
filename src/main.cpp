@@ -27,13 +27,6 @@ int main() {
 
   // Following 2 threads are runnning cuncurently
 
-  pthread_t debugPrintsThread; // Print Cube status
-  if (pthread_create(&debugPrintsThread, NULL, debugPrints,
-                     (void *)&cubeSystem) != 0) {
-    printf("[ERROR] - Cannot create debugPrintsThread\n");
-    exit(EXIT_FAILURE);
-  } // Dont want to wait function to end ...
-
   pthread_t customPositionThread; // Set custom position
   if (pthread_create(&customPositionThread, NULL, customPosition,
                      (void *)&cubeSystem) != 0) {
@@ -48,7 +41,7 @@ int main() {
     exit(EXIT_FAILURE);
   }
   pthread_join(customPositionThread, NULL);
-  pthread_join(debugPrintsThread, NULL);
+  pthread_join(readButtonsThread, NULL);
 
   // WARN: Fazer thread que quando clica em um botão, faz interrupt e liga um
   // led!

@@ -26,7 +26,6 @@ void initExpander(Expander *expander, uint8_t I2CAddress, uint8_t IOdirA,
            expander->I2CAddress);
     exit(EXIT_FAILURE);
   }
-  printf("[TEST] ------- %d\t%d\n", inputsDirA, inputsDirB);
 
   // Port A and B Setup
   // Set Port A direction Inputs and Outputs
@@ -64,8 +63,6 @@ void initExpander(Expander *expander, uint8_t I2CAddress, uint8_t IOdirA,
 
   // Set initial values
   setExpanderVal(expander, (uint16_t(initialValueGPA) << 8) || initialValueGPB);
-  printf("[INFO] - Expander has been started with value: %d\n",
-         (uint16_t(initialValueGPA) << 8) || initialValueGPB);
   printf("[INFO] - Sucessfully initialized expander\n");
 
   return;
@@ -86,8 +83,6 @@ void initShifter(Shifter *shifter, uint16_t dataPin, uint16_t clockPin,
     printf("[ERROR] - Cannot initialize shifter\n");
     exit(EXIT_FAILURE);
   }
-  printf("dataPin: %d\n clockPin: %d\nOutput: %d\n LOW: %d\n", shifter->dataPin,
-         shifter->clockPin, OUTPUT, LOW);
   pinMode(shifter->dataPin, OUTPUT);
   pinMode(shifter->clockPin, OUTPUT);
   digitalWrite(shifter->dataPin, LOW);
@@ -173,8 +168,6 @@ void initCubeSystem(CubeSystem *system) {
 
   // initialize shifters
   initShifter(&system->Shifter1, DATA_PIN, CLOCK_PIN, 0x0000);
-  printf("[INFO] - Successfully initialized system\n");
-
   return;
 }
 
@@ -220,16 +213,11 @@ void setShifterVal(Shifter *shifter, uint16_t data) {
   bool resultBool = 0;
   for (int i = 0; i < 16; i++) {
     resultBool = (data & (1 << (15 - i))) ? HIGH : LOW;
-    printf("[INFO] - resultBool value: %d\n", resultBool);
+    /* printf("[INFO] - resultBool value: %d\n", resultBool); */
     digitalWrite(shifter->dataPin, resultBool);
     clockPulse(shifter, 100);
   }
   shifter->data = data;
-  printf("[INFO] - Value in shifter->data: %d\n", shifter->data);
-  printf("[INFO] - Successfully wrote to shifter. Data: ");
-  printBinary(shifter->data);
-
-  printf("dataPin value: %d", shifter->dataPin);
 
   return;
 }
@@ -250,10 +238,6 @@ uint16_t readRegisters(Expander *expander) {
     printf("[ERROR] - Invalid parameter in readRegisters\n");
     exit(EXIT_FAILURE);
   }
-
-  printf("[AAAA] - %d\t%d\n", expander->fd, expander->portGPIOA);
-  printf("[BBBB] - %d\n",
-         wiringPiI2CReadReg8(expander->fd, expander->portGPIOA));
 
   return ((uint16_t)wiringPiI2CReadReg8(expander->fd, expander->portGPIOB)
           << 8) |

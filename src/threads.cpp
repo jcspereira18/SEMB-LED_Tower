@@ -25,33 +25,6 @@ void *globalReset(void *args) {
   return nullptr;
 }
 
-void *debugPrints(void *args) {
-  CubeSystem *cubeSystem = (CubeSystem *)args;
-  time_t startTime = time(NULL), currentTime, totalTime = 15;
-
-  usleep(3 * 1'000'000);
-  while (1) {
-    currentTime = time(NULL);
-    printf("\n----------- # ----------\n");
-    printf("Readings from second %ld\n", currentTime - startTime);
-    printf("Expander1 ~ valueGPA: %d - valueGPB: %d\n",
-           cubeSystem->Expander1.valueGPA, cubeSystem->Expander1.valueGPB);
-    printf("Expander2 ~ valueGPA: %d - valueGPB: %d\n",
-           cubeSystem->Expander2.valueGPA, cubeSystem->Expander2.valueGPB);
-    printf("Expander3 ~ valueGPA: %d - valueGPB: %d\n",
-           cubeSystem->Expander3.valueGPA, cubeSystem->Expander3.valueGPB);
-    printf("Shifter ~ Data: %d\n", cubeSystem->Shifter1.data);
-    printf("----------- # ----------\n\n");
-    usleep(1'000'000);
-    if (difftime(currentTime, startTime) >= totalTime * 500) {
-      printf("[INFO] debugPrints ended execution of %ld seconds, returning.\n",
-             totalTime);
-      break;
-    }
-  }
-  return nullptr;
-}
-
 void *customPosition(void *args) {
   CubeSystem *cubeSystem = (CubeSystem *)args;
 
@@ -68,9 +41,18 @@ void *customPosition(void *args) {
 void *readButtons(void *args) {
   CubeSystem *cubeSystem = (CubeSystem *)args;
 
+  int i = 0;
+  printf("\n");
   while (1) {
-    printf("[INFO] - Values read from expander1: \n");
+    printf("[index] - %d\n", i);
+    printf("[INFO] - Values read from expander1: ");
     printBinary(readRegisters(&cubeSystem->Expander1));
+    printf("[INFO] - Values read from expander2: ");
+    printBinary(readRegisters(&cubeSystem->Expander2));
+    printf("[INFO] - Values read from expander3: ");
+    printBinary(readRegisters(&cubeSystem->Expander3));
+    printf("\n");
+    i++;
     usleep(1000000);
   }
 }
