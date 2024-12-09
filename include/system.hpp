@@ -52,8 +52,8 @@ typedef struct{
     uint8_t IOdirB;         // I/O direction register for Port B
     uint8_t inputsDirA;     // Input pins for Port A
     uint8_t inputsDirB;     // Input pins for Port B
-    uint8_t portGPPUA;      // Pull-up resistor configuration for Port A // TODO: TEST
-    uint8_t portGPPUB;      // Pull-up resistor configuration for Port B // TODO: TEST
+    uint8_t portGPPUA;      // Pull-up resistor configuration for Port A
+    uint8_t portGPPUB;      // Pull-up resistor configuration for Port B 
     uint8_t valueGPA;       // Pin values for Port A
     uint8_t valueGPB;       // Pin values for Port B
     Button* Button1;
@@ -97,4 +97,5 @@ void setShifterVal(Shifter* shifter, uint16_t data);
 void clockPulse(Shifter* shifter, useconds_t utime);
 void printBinary(uint16_t value);
 uint16_t readRegisters(Expander* expander);
+
 #endif // SHIFTREGS_HPP
