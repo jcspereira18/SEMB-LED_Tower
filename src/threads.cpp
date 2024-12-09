@@ -16,11 +16,11 @@ void* createCubeSystem(void* args){
 void* globalReset(void* args){
     CubeSystem* cubeSystem = (CubeSystem*)args;
 
-    setExpanderVal(&cubeSystem->Expander1, 0x0000);
-    setExpanderVal(&cubeSystem->Expander2, 0x0000);
-    setExpanderVal(&cubeSystem->Expander3, 0x0000);
+    setExpanderVal(&cubeSystem->Expander1, 0xFFFF);
+    setExpanderVal(&cubeSystem->Expander2, 0xFFFF);
+    setExpanderVal(&cubeSystem->Expander3, 0xFFFF);
     
-    //setShifterVal(&cubeSystem->Shifter1, 0b0000'0000'0000'0000);
+    setShifterVal(&cubeSystem->Shifter1, 0b0000'0000'0000'0000);
     printf("[INFO] - Successfully reset the system globally\n");
 
     return nullptr;
@@ -49,4 +49,26 @@ void* debugPrints(void* args){
         }
     }
     return nullptr;
+}
+
+void* customPosition(void* args){
+    CubeSystem* cubeSystem = (CubeSystem*)args;
+
+    setExpanderVal(&cubeSystem->Expander1, 0b1111'1111'0000'0000); // U1
+    setExpanderVal(&cubeSystem->Expander2, 0b0000'0000'0000'0000); // U2
+    setExpanderVal(&cubeSystem->Expander3, 0b0000'0000'0000'0000); // U3 LOGICA INVERSAAAAAAAAAAAAAAAAAA
+
+    setShifterVal(&cubeSystem->Shifter1, 0b0000'0000'0000'0000); // U4_QA HIGH // Handling U4 and U5
+    printf("[INFO] - Successfully set the custom position\n");
+    return nullptr;
+}
+
+void* readButtons(void* args){
+    CubeSystem* cubeSystem = (CubeSystem*)args;
+
+    while(1){
+        printf("[INFO] - Values read from expander1: \n");
+        printBinary(readRegisters(&cubeSystem->Expander1));
+        usleep(1000000);
+    }
 }

@@ -6,18 +6,6 @@
 #include "../include/system.hpp"
 #include "../include/threads.hpp"
 
-// Trying to turn D1 ON
-void* customPosition(void* args){
-    CubeSystem* cubeSystem = (CubeSystem*)args;
-
-    setExpanderVal(&cubeSystem->Expander1, 0b0000'0000'0000'0000); // U1
-    setExpanderVal(&cubeSystem->Expander2, 0b0000'0000'0000'0000); // U2
-    setExpanderVal(&cubeSystem->Expander3, 0b0000'0000'0000'0000); // U3 LOGICA INVERSAAAAAAAAAAAAAAAAAA
-
-    setShifterVal(&cubeSystem->Shifter1, 0b1111'1111'1111'1111); // U4_QA HIGH // Handling U4 and U5
-    printf("[INFO] - Successfully set the custom position\n");
-    return nullptr;
-}
 
 int main() {
     CubeSystem cubeSystem;
@@ -28,7 +16,6 @@ int main() {
         exit(EXIT_FAILURE);
     }
     pthread_join(initCubeSystemThread, NULL); // wait thread to finish
-    printf("[INFO] - Cube has been initialized\n");
 
     pthread_t globalResetThread; // Reseting global State of the Cube
     if(pthread_create(&globalResetThread, NULL, globalReset,  (void*)&cubeSystem) != 0){
@@ -52,8 +39,12 @@ int main() {
         exit(EXIT_FAILURE);
     }
 
+    pthread_t readButtonsThread;
+    if(pthread_create(&readButtonsThread, NULL, readButtons, (void*)&cubeSystem) != 0){
+        printf("[ERROR] - Cannot create readButtons\n");
+        exit(EXIT_FAILURE);
+    } 
     pthread_join(customPositionThread, NULL);
-    printf("[INFO] - Completed custom position\n");
     pthread_join(debugPrintsThread, NULL);
 
     printf("Program runned all tasks. Exiting now.\n");
