@@ -1,6 +1,8 @@
 #ifndef COMPONENTS_HPP
 #define COMPONENTS_HPP
 
+#include <stdlib.h>
+#include <unistd.h>
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
 
@@ -94,4 +96,5 @@ void initShifter(Shifter *shifter, uint16_t dataPin, uint16_t clockPin,
                  uint16_t initialData);
 void initCubeSystem(CubeSystem *system);
 void initButton(Button *b, uint16_t pin);
+
 #endif // COMPONENTS_HPP
