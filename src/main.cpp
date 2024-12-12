@@ -1,50 +1,44 @@
 #include <pthread.h>
 #include <stdio.h>
-#include <stdlib.h>
 
-// #include "../include/main.hpp"
-#include "../include/system.hpp"
+#include "../include/components/init_comp.hpp"
 #include "../include/threads.hpp"
 
 int main() {
-  CubeSystem cubeSystem;
+  CubeSystem c; // System struct
 
-  pthread_t initCubeSystemThread; // Initializing Cube System
+  pthread_t initCubeSystemThread, // Initialize system
+      globalResetThread,          // Set global variables to 0
+      customPositionThread,       // Set custom variables to test
+      readButtonsThread;          // Loop to read buttons
+
   if (pthread_create(&initCubeSystemThread, NULL, createCubeSystem,
-                     (void *)&cubeSystem) != 0) {
+                     (void *)&c) != 0) {
     printf("[ERROR] - Cannot create cube system\n");
     exit(EXIT_FAILURE);
   }
-  pthread_join(initCubeSystemThread, NULL); // wait thread to finish
+  pthread_join(initCubeSystemThread, NULL);
 
-  pthread_t globalResetThread; // Reseting global State of the Cube
-  if (pthread_create(&globalResetThread, NULL, globalReset,
-                     (void *)&cubeSystem) != 0) {
+  if (pthread_create(&globalResetThread, NULL, globalReset, (void *)&c) != 0) {
     printf("[ERROR] - Cannot create globalResetThread\n");
     exit(EXIT_FAILURE);
   }
   pthread_join(globalResetThread, NULL);
 
-  // Following 2 threads are runnning cuncurently
-
-  pthread_t customPositionThread; // Set custom position
-  if (pthread_create(&customPositionThread, NULL, customPosition,
-                     (void *)&cubeSystem) != 0) {
+  if (pthread_create(&customPositionThread, NULL, customPosition, (void *)&c) !=
+      0) {
     printf("[ERROR] - Cannot create customPositionThread\n");
     exit(EXIT_FAILURE);
   }
 
-  pthread_t readButtonsThread;
-  if (pthread_create(&readButtonsThread, NULL, readButtons,
-                     (void *)&cubeSystem) != 0) {
+  if (pthread_create(&readButtonsThread, NULL, readButtonsFunc, (void *)&c) !=
+      0) {
     printf("[ERROR] - Cannot create readButtons\n");
     exit(EXIT_FAILURE);
   }
   pthread_join(customPositionThread, NULL);
   pthread_join(readButtonsThread, NULL);
 
-  // WARN: Fazer thread que quando clica em um botão, faz interrupt e liga um
-  // led!
-  printf("Program runned all tasks. Exiting now.\n");
   return 0;
 }
+// TODO: Fazer thread que quando clica em um botão, faz interrupt e liga um led!

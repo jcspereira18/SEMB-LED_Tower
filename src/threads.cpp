@@ -1,58 +1,50 @@
-#include <pthread.h>
 #include <stdio.h>
 
-#include "../include/system.hpp"
+#include "../include/components/init_comp.hpp"
+#include "../include/components/tools.hpp"
 #include "../include/threads.hpp"
 
 void *createCubeSystem(void *args) {
-  CubeSystem *cubeSystem = (CubeSystem *)args;
+  CubeSystem *c = (CubeSystem *)args;
 
-  initCubeSystem(cubeSystem);
-  printf("[INFO] - Successfully created cube system\n");
+  initCubeSystem(c);
   return nullptr;
 }
 
 void *globalReset(void *args) {
-  CubeSystem *cubeSystem = (CubeSystem *)args;
+  CubeSystem *c = (CubeSystem *)args;
 
-  setExpanderVal(&cubeSystem->Expander1, 0xFFFF);
-  setExpanderVal(&cubeSystem->Expander2, 0xFFFF);
-  setExpanderVal(&cubeSystem->Expander3, 0xFFFF);
+  setExpanderVal(&c->Expander1, 0x0000);
+  setExpanderVal(&c->Expander2, 0x0000);
+  setExpanderVal(&c->Expander3, 0x0000);
 
-  setShifterVal(&cubeSystem->Shifter1, 0b0000'0000'0000'0000);
-  printf("[INFO] - Successfully reset the system globally\n");
+  setShifterVal(&c->Shifter1, 0x0000);
 
   return nullptr;
 }
 
 void *customPosition(void *args) {
-  CubeSystem *cubeSystem = (CubeSystem *)args;
+  CubeSystem *c = (CubeSystem *)args;
 
-  setExpanderVal(&cubeSystem->Expander1, 0b0011'1111'0000'0000); // U1
-  setExpanderVal(&cubeSystem->Expander2, 0b0000'0000'0000'0000); // U2
-  setExpanderVal(&cubeSystem->Expander3, 0b0000'0000'0000'0000); // U3
+  setExpanderVal(&c->Expander1, 0x0000); // U1
+  setExpanderVal(&c->Expander2, 0x0000); // U2
+  setExpanderVal(&c->Expander3, 0x0000); // U3
 
-  setShifterVal(&cubeSystem->Shifter1,
-                0b0000'0000'0000'0000); // U4_QA HIGH // Handling U4 and U5
-  printf("[INFO] - Successfully set the custom position\n");
+  setShifterVal(&c->Shifter1, 0x0000); // U4_U5
+
   return nullptr;
 }
 
-void *readButtons(void *args) {
-  CubeSystem *cubeSystem = (CubeSystem *)args;
+void *readButtonsFunc(void *args) {
+  CubeSystem *c = (CubeSystem *)args;
 
   int i = 0;
   printf("\n");
   while (1) {
-    printf("[index] - %d\n", i);
-    printf("[INFO] - Values read from expander1: ");
-    printBinary(readRegisters(&cubeSystem->Expander1));
-    printf("[INFO] - Values read from expander2: ");
-    printBinary(readRegisters(&cubeSystem->Expander2));
-    printf("[INFO] - Values read from expander3: ");
-    printBinary(readRegisters(&cubeSystem->Expander3));
-    printf("\n");
     i++;
-    usleep(1000000);
+    readButtons(&c->Expander1);
+    readButtons(&c->Expander2);
+    readButtons(&c->Expander3);
+    usleep(100000);
   }
 }

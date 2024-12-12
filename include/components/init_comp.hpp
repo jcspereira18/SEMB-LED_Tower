@@ -1,17 +1,15 @@
-#ifndef SYSTEM_HPP
-#define SYSTEM_HPP
+#ifndef COMPONENTS_HPP
+#define COMPONENTS_HPP
 
-#include <stdlib.h>
-#include <unistd.h>
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
 
+// Cube dimensions
 #define ANDARES 11 // 6 reais + 5 imaginários
 #define COLUNAS 6
 #define LINHAS 6
 
-// -------------------------------- Expander defines
-// -------------------------------- MCP23017 Registers
+// Expander defines
 #define MCP23017_I2C_ADDRESS_1 0x24
 #define MCP23017_I2C_ADDRESS_2 0x26
 #define MCP23017_I2C_ADDRESS_3 0x27
@@ -24,14 +22,11 @@
 #define OLATB 0x15  // Registro de latch de saída Port B
 #define GPPUA 0x0C  // Pull-up Resistor Configuration for Port A
 #define GPPUB 0x0D  // Pull-up Resistor Configuration for Port B
-// -------------------------------- Shifter defines
-// --------------------------------
+
+// Shifter defines
 #define DATA_PIN 17
 #define CLOCK_PIN 4
 
-// -------------------------------- Structs --------------------------------
-//
-// Cube initialization
 typedef struct {
   unsigned char ledValues[ANDARES][COLUNAS][LINHAS];
   unsigned char toUpdateVal[ANDARES][COLUNAS][LINHAS];
@@ -43,7 +38,7 @@ typedef struct {
   uint16_t pin;
 } Button;
 
-// MCP23017 I/O expander
+// MCP23017
 typedef struct {
   int fd;             // File descriptor for I2C
   uint8_t I2CAddress; // I2C address
@@ -63,7 +58,7 @@ typedef struct {
   Button *Button4;
 } Expander;
 
-// 74HC164 shifter
+// 74HC164
 typedef struct {
   int dataPin;
   int clockPin;
@@ -75,9 +70,8 @@ typedef struct {
   Expander Expander1; // U1
   Expander Expander2; // U2
   Expander Expander3; // U3
-  Shifter Shifter1;   // U4
-                      //  Shifter Shifter2;   // U5
-  Button Button11;    // Button Line & Column
+  Shifter Shifter1;   // U4 & U5
+  Button Button11;
   Button Button12;
   Button Button13;
   Button Button14;
@@ -91,11 +85,13 @@ typedef struct {
   Button Button26;
 } CubeSystem;
 
+void initExpander(Expander *expander, uint8_t I2CAddress, uint8_t IOdirA,
+                  uint8_t IOdirB, uint8_t portGPIOA, uint8_t portGPIOB,
+                  uint8_t portGPPUA, uint8_t portGPPUB, uint8_t inputsDirA,
+                  uint8_t inputsDirB, uint8_t initialValueGPA,
+                  uint8_t initialValueGPB);
+void initShifter(Shifter *shifter, uint16_t dataPin, uint16_t clockPin,
+                 uint16_t initialData);
 void initCubeSystem(CubeSystem *system);
-void setExpanderVal(Expander *expander, uint16_t data);
-void setShifterVal(Shifter *shifter, uint16_t data);
-void clockPulse(Shifter *shifter, useconds_t utime);
-void printBinary(uint16_t value);
-uint16_t readRegisters(Expander *expander);
-
-#endif // SHIFTREGS_HPP
+void initButton(Button *b, uint16_t pin);
+#endif // COMPONENTS_HPP
