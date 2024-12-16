@@ -30,7 +30,7 @@
 #define CLOCK_PIN 4
 
 typedef struct {
-  unsigned char ledValues[ANDARES][COLUNAS][LINHAS];
+  bool ledValues[ANDARES][COLUNAS][LINHAS];
   unsigned char toUpdateVal[ANDARES][COLUNAS][LINHAS];
 } LedCube;
 

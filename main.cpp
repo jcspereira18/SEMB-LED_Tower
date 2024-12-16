@@ -1,14 +1,14 @@
 #include <pthread.h>
 #include <stdio.h>
 
-#include "../include/threads.hpp"
-#include "../include/components/init_comp.hpp"
+#include "include/components/init_comp.hpp"
+#include "include/threads.hpp"
 
 int main() {
   CubeSystem c; // System struct
 
   pthread_t initCubeSystemThread, // Initialize system
-      globalResetThread,          // Set global variables to 0
+      globalResetThread,          // Set global variables to
       customPositionThread,       // Set custom variables to test
       readButtonsThread;          // Loop to read buttons
 
@@ -37,8 +37,23 @@ int main() {
     exit(EXIT_FAILURE);
   }
   pthread_join(customPositionThread, NULL);
-  pthread_join(readButtonsThread, NULL);
+  // pthread_join(readButtonsThread, NULL);
 
+  pthread_t updateLedStatusThread;
+
+  if (pthread_create(&updateLedStatusThread, NULL, updateLedStatus,
+                     (void *)&c) != 0) {
+    printf("[ERROR] - coisas\n");
+    exit(EXIT_FAILURE);
+  }
+  pthread_join(updateLedStatusThread, NULL);
+
+  // Reset
+  printf("[ERROR] - Cannot create globalResetThread\n");
+  if (pthread_create(&globalResetThread, NULL, globalReset, (void *)&c) != 0) {
+    exit(EXIT_FAILURE);
+  }
+  pthread_join(globalResetThread, NULL);
   return 0;
 }
 // TODO: Fazer thread que quando clica em um botão, faz interrupt e liga um led!
