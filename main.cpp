@@ -1,8 +1,8 @@
 #include <pthread.h>
 #include <stdio.h>
 
-#include "../include/components/init_comp.hpp"
 #include "../include/threads.hpp"
+#include "../include/components/init_comp.hpp"
 
 int main() {
   CubeSystem c; // System struct

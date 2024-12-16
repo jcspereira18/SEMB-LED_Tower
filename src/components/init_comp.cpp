@@ -18,7 +18,9 @@ void initCubeSystem(CubeSystem *s) {
   // 2 -> 2
   // 3 -> 1
   // 4 -> 3
-
+    
+  // TODO: Change this initializations
+  // BUG: Buttons are not correctly associated
   initButton(&s->Button11, 0b1000'0000'0000'0000);
   initButton(&s->Button12, 0b0000'0010);
   initButton(&s->Button21, 0b0000'0001);
