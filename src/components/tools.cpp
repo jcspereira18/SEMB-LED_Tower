@@ -25,13 +25,12 @@ void setShifterVal(Shifter *s, uint16_t data) {
     exit(EXIT_FAILURE);
   }
 
-  bool resultBool = 0;
+  /* bool resultBool = 0; */
   for (int i = 0; i < 16; i++) {
-    resultBool = (data & (1 << (15 - i))) ? HIGH : LOW;
-    digitalWrite(s->dataPin, resultBool);
-    // WARN: Calibrate delay!
-    /* clockPulse(s, 100 * 0.0001); */
-    clockPulse(s, 100 / 2);
+    /* resultBool = (data & (1 << (15 - i))) ? HIGH : LOW; */
+    /* digitalWrite(s->dataPin, resultBool); */
+    digitalWrite(s->dataPin, (data & (1 << (15 - i))) ? HIGH : LOW);
+    clockPulse(s, 1);
   }
   s->data = data;
 
@@ -66,10 +65,10 @@ void readButtons(Expander *e) {
   }
 
   uint16_t data = readRegisters(e);
- // printBinary(data);
+  // printBinary(data);
 
-  //printBinary(e->Button1->pin);
-  //printBinary(e->Button1->pin && wiringPiI2CReadReg8(e->fd, e->portGPIOA));
+  // printBinary(e->Button1->pin);
+  // printBinary(e->Button1->pin && wiringPiI2CReadReg8(e->fd, e->portGPIOA));
 
   return;
 }
