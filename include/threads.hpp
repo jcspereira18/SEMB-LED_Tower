@@ -10,4 +10,5 @@ void *readButtonsFunc(void *args);
 void *updateLedValues(void *args);
 int realFloorToIndex(int floor);
 void *updateLedStatus(void *args);
+void *animationCube1(void *args);
 #endif // THREADS_HPP

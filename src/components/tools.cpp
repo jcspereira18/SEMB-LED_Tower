@@ -80,5 +80,28 @@ void printBinary(uint16_t value) {
       printf(" ");
     }
   }
-  printf("\n");
+  printf("\n\n");
+}
+
+void goToNextcycle(Shifter *s) {
+  if (s == NULL) {
+    printf("[ERROR] - Invalid parameter in cycleShifter\n");
+    exit(EXIT_FAILURE);
+  }
+  if (s->data == 0b0000'0100'0000'0000) {
+    s->data = 0b0000'0000'0000'0001;
+    // remove 1 from MSB
+    digitalWrite(s->dataPin, LOW);
+    clockPulse(s, 10);
+
+    // add 1 in LSB
+    digitalWrite(s->dataPin, HIGH);
+    clockPulse(s, 10);
+    digitalWrite(s->dataPin, LOW);
+    return;
+  }
+  s->data = s->data << 2;
+  clockPulse(s, 10);
+  clockPulse(s, 10);
+  return;
 }

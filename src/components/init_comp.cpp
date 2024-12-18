@@ -18,7 +18,7 @@ void initCubeSystem(CubeSystem *s) {
   // 2 -> 2
   // 3 -> 1
   // 4 -> 3
-    
+
   // TODO: Change this initializations
   // BUG: Buttons are not correctly associated
   initButton(&s->Button11, 0b1000'0000'0000'0000);
@@ -61,7 +61,7 @@ void initCubeSystem(CubeSystem *s) {
                GPIOB, GPPUA, GPPUB, 0b0000'0011, 0b1100'0000, 0x00, 0x00);
 
   // initialize shifters
-  initShifter(&s->Shifter1, DATA_PIN, CLOCK_PIN, 0x0000);
+  initShifter(&s->Shifter1, DATA_PIN, CLOCK_PIN, 0x0001);
 
   return;
 }
@@ -118,7 +118,6 @@ void initExpander(Expander *e, uint8_t I2CAddress, uint8_t IOdirA,
 
   // Set initial values
   setExpanderVal(e, (uint16_t(initialValueGPA) << 8) || initialValueGPB);
-  printf("[INFO] - Sucessfully initialized expander\n");
 
   return;
 }
@@ -156,4 +155,3 @@ void initButton(Button *b, uint16_t pin) {
   b->pin = pin;
   return;
 }
-

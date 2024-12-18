@@ -9,5 +9,6 @@ void setShifterVal(Shifter *shifter, uint16_t data);
 void clockPulse(Shifter *shifter, useconds_t utime);
 uint16_t readRegisters(Expander *expander);
 void readButtons(Expander *expander);
+void goToNextcycle(Shifter *s);
 
 #endif // TOOLS_HPP
