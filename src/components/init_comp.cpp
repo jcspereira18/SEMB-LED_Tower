@@ -9,9 +9,9 @@ void initCubeSystem(CubeSystem *s) {
     printf("[ERROR] - Invalid parameter while initializing cube system\n");
     exit(EXIT_FAILURE);
   }
+  
   // initialize Cube with 0's
   memset(s->Cube.ledValues, 0, sizeof(s->Cube.ledValues));
-  memset(s->Cube.toUpdateVal, 0, sizeof(s->Cube.toUpdateVal));
 
   // initialize buttons
   // 1 -> 4
@@ -19,7 +19,6 @@ void initCubeSystem(CubeSystem *s) {
   // 3 -> 1
   // 4 -> 3
 
-  // TODO: Change this initializations
   // BUG: Buttons are not correctly associated
   initButton(&s->Button11, 0b1000'0000'0000'0000);
   initButton(&s->Button12, 0b0000'0010);
@@ -61,7 +60,7 @@ void initCubeSystem(CubeSystem *s) {
                GPIOB, GPPUA, GPPUB, 0b0000'0011, 0b1100'0000, 0x00, 0x00);
 
   // initialize shifters
-  initShifter(&s->Shifter1, DATA_PIN, CLOCK_PIN, 0x0001);
+  initShifter(&s->Shifter1, DATA_PIN, CLOCK_PIN, 0x0000);
 
   return;
 }
