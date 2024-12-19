@@ -20,7 +20,7 @@ void initCubeSystem(CubeSystem *s) {
   // 4 -> 3
 
   // BUG: Buttons are not correctly associated
-  initButton(&s->Button11, 0b1000'0000'0000'0000);
+  initButton(&s->Button11, 0);
   initButton(&s->Button12, 0b0000'0010);
   initButton(&s->Button21, 0b0000'0001);
   initButton(&s->Button22, 0b0100'0000'0000'0000);

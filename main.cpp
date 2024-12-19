@@ -31,6 +31,11 @@ int main() {
   create_thread(&animationCube1Thread, animationCube1, (void *)&c,
                 "Cannot create update LED status thread");
 
+
+  pthread_t updateButtonStatusThread;
+  create_thread(&updateButtonStatusThread, updateButtonStatus, (void *)&c,
+                "Cannot create updateButtonStatusThread");
+
   pthread_join(updateLedStatusThread, NULL);
   pthread_join(animationCube1Thread, NULL);
 

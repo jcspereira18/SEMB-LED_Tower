@@ -39,6 +39,7 @@ typedef struct {
 // TODO: Debouce buttons
 typedef struct {
   bool state;
+  bool previousState;
   uint16_t pin;
 } Button;
 

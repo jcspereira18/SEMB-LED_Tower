@@ -48,7 +48,7 @@ void clockPulse(Shifter *s, useconds_t utime) {
   return;
 }
 
-uint16_t readRegisters(Expander *e) {
+uint16_t readExpander(Expander *e) {
   if (e == NULL) {
     printf("[ERROR] - Invalid parameter in readRegisters\n");
     exit(EXIT_FAILURE);
@@ -56,16 +56,6 @@ uint16_t readRegisters(Expander *e) {
 
   return ((uint16_t)wiringPiI2CReadReg8(e->fd, e->portGPIOB) << 8) |
          wiringPiI2CReadReg8(e->fd, e->portGPIOA);
-}
-
-void readButtons(Expander *e) {
-  if (e == NULL) {
-    printf("[ERROR] - Invalid parameter in updateButton\n");
-    exit(EXIT_FAILURE);
-  }
-
-  uint16_t data = readRegisters(e);
-  return;
 }
 
 void printBinary(uint16_t value) {
@@ -100,4 +90,19 @@ void goToNextcycle(Shifter *s) {
   clockPulse(s, 10);
   clockPulse(s, 10);
   return;
+}
+
+bool debounceButton(Button *b, uint16_t reading) {
+  if (b == NULL) {
+    printf("[ERROR] - Invalid parameter in debounceButton\n");
+    exit(EXIT_FAILURE);
+  }
+  if ((bool)reading != b->previousState) {
+    b->previousState = (bool)reading;
+
+  } else if ((bool)reading != b->state) {
+    b->state = (bool)reading;
+    return true;
+  }
+  return false;
 }

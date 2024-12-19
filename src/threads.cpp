@@ -24,20 +24,6 @@ void *globalReset(void *args) {
   return nullptr;
 }
 
-void *readButtonsFunc(void *args) {
-  CubeSystem *c = (CubeSystem *)args;
-
-  int i = 0;
-  printf("\n");
-  while (1) {
-    i++;
-    readButtons(&c->Expander1);
-    readButtons(&c->Expander2);
-    readButtons(&c->Expander3);
-    usleep(100000);
-  }
-}
-
 uint16_t createMaskWithZero(int pos) {
   // Ensure the position is within the valid range for 16 bits
   if (pos < 0 || pos > 15) {
@@ -125,7 +111,7 @@ void *updateLedStatus(void *args) {
   if (c->Shifter1.data == 0)
     setShifterVal(&c->Shifter1, 1);
 
-  while (difftime(currentTime, startTime) <= 60 * 5) {
+  while (difftime(currentTime, startTime) <= 60 * 60) {
     currentTime = time(NULL);
 
     // Interate for each floor not considering imaginary floors
@@ -155,7 +141,7 @@ void *updateLedStatus(void *args) {
       setExpanderVal(&c->Expander1, expanderVal1);
       setExpanderVal(&c->Expander2, expanderVal2);
       setExpanderVal(&c->Expander3, expanderVal3);
-      usleep(10000 / 9);
+      usleep(10000 / 10);
 
       // reset
       expanderVal1 = 0xFFFF;
@@ -168,5 +154,78 @@ void *updateLedStatus(void *args) {
       goToNextcycle(&c->Shifter1);
     }
   }
+  return nullptr;
+}
+
+void *updateButtonStatus(void *args) {
+  CubeSystem *c = (CubeSystem *)args;
+
+  uint16_t readingExp1 = 0;
+  uint16_t readingExp2 = 0;
+  uint16_t readingExp3 = 0;
+
+  while (1) {
+    readingExp1 = readExpander(&c->Expander1);
+    readingExp2 = readExpander(&c->Expander2);
+    readingExp3 = readExpander(&c->Expander3);
+
+    debounceButton(&c->Button11, ~readingExp1 & 0b0100'0000'0000'0000);
+    debounceButton(&c->Button12, ~readingExp1 & 0b0000'0000'0000'0010);
+    debounceButton(&c->Button21, ~readingExp1 & 0b1000'0000'0000'0000);
+    debounceButton(&c->Button22, ~readingExp1 & 0b0000'0000'0000'0001);
+
+    debounceButton(&c->Button13, ~readingExp2 & 0b0100'0000'0000'0000);
+    debounceButton(&c->Button14, ~readingExp2 & 0b0000'0000'0000'0010);
+    debounceButton(&c->Button23, ~readingExp2 & 0b1000'0000'0000'0000);
+    debounceButton(&c->Button24, ~readingExp2 & 0b0000'0000'0000'0001);
+
+    debounceButton(&c->Button15, ~readingExp3 & 0b0100'0000'0000'0000);
+    debounceButton(&c->Button16, ~readingExp3 & 0b0000'0000'0000'0010);
+    debounceButton(&c->Button25, ~readingExp3 & 0b1000'0000'0000'0000);
+    debounceButton(&c->Button26, ~readingExp3 & 0b0000'0000'0000'0001);
+
+    /* if (c->Button11.state == c->Button11.previousState) { */
+    /*   c->Button11.state = ~readingExp1 & 0b0100'0000'0000'0000; */
+    /* } */
+
+    if (c->Button11.state) {
+      printf("Button 11 is pressed\n");
+    }
+    if (c->Button12.state) {
+      printf("Button 12 is pressed\n");
+    }
+    if (c->Button13.state) {
+      printf("Button 13 is pressed\n");
+    }
+    if (c->Button14.state) {
+      printf("Button 14 is pressed\n");
+    }
+    if (c->Button15.state) {
+      printf("Button 15 is pressed\n");
+    }
+    if (c->Button16.state) {
+      printf("Button 16 is pressed\n");
+    }
+    if (c->Button21.state) {
+      printf("Button 21 is pressed\n");
+    }
+    if (c->Button22.state) {
+      printf("Button 22 is pressed\n");
+    }
+    if (c->Button23.state) {
+      printf("Button 23 is pressed\n");
+    }
+    if (c->Button24.state) {
+      printf("Button 24 is pressed\n");
+    }
+    if (c->Button25.state) {
+      printf("Button 25 is pressed\n");
+    }
+    if (c->Button26.state) {
+      printf("Button 26 is pressed\n");
+    }
+    usleep(100'000 / 6);
+  }
+
   return nullptr;
 }
