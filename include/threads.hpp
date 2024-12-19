@@ -30,5 +30,4 @@ void *animationCube1(void *args);
 
 void *updateButtonStatus(void *args);
 
-
 #endif // THREADS_HPP
