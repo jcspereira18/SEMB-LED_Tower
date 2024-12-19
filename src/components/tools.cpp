@@ -65,11 +65,6 @@ void readButtons(Expander *e) {
   }
 
   uint16_t data = readRegisters(e);
-  // printBinary(data);
-
-  // printBinary(e->Button1->pin);
-  // printBinary(e->Button1->pin && wiringPiI2CReadReg8(e->fd, e->portGPIOA));
-
   return;
 }
 
@@ -88,6 +83,7 @@ void goToNextcycle(Shifter *s) {
     printf("[ERROR] - Invalid parameter in cycleShifter\n");
     exit(EXIT_FAILURE);
   }
+
   if (s->data == 0b0000'0100'0000'0000) {
     s->data = 0b0000'0000'0000'0001;
     // remove 1 from MSB

@@ -24,18 +24,6 @@ void *globalReset(void *args) {
   return nullptr;
 }
 
-void *customPosition(void *args) {
-  CubeSystem *c = (CubeSystem *)args;
-
-  setExpanderVal(&c->Expander1, 0xFFFF); // U1
-  setExpanderVal(&c->Expander2, 0xFFFF); // U2
-  setExpanderVal(&c->Expander3, 0xFFFF); // U3
-
-  setShifterVal(&c->Shifter1, 0x0000); // U4_U5
-
-  return nullptr;
-}
-
 void *readButtonsFunc(void *args) {
   CubeSystem *c = (CubeSystem *)args;
 
@@ -84,7 +72,7 @@ void *animationCube1(void *args) {
     }
   }
   // Loop through all layers
-  for (int t = 0; difftime(currentTime, startTime) <= 30; t++) {
+  for (int t = 0; difftime(currentTime, startTime) <= 10 * 60 * 60; t++) {
     // Randomly generate raindrops on the top layer (z = 5)
     for (int i = 0; i < 4;
          i++) { // `dropRate` controls how many drops are added per frame
@@ -127,7 +115,6 @@ void *updateLedStatus(void *args) {
 
   // c->Cube.ledValues[linha][coluna][andar]
 
-  uint16_t shifterValues1 = 0;
   uint16_t expanderVal1 = 0xFFFF;
   uint16_t expanderVal2 = 0xFFFF;
   uint16_t expanderVal3 = 0xFFFF;
@@ -135,7 +122,10 @@ void *updateLedStatus(void *args) {
   time_t startTime = time(NULL);
   time_t currentTime = time(NULL);
 
-  while (difftime(currentTime, startTime) <= 30) {
+  if (c->Shifter1.data == 0)
+    setShifterVal(&c->Shifter1, 1);
+
+  while (difftime(currentTime, startTime) <= 60 * 5) {
     currentTime = time(NULL);
 
     // Interate for each floor not considering imaginary floors
@@ -146,8 +136,6 @@ void *updateLedStatus(void *args) {
 
           // Update values for each coluna and linha
           if (c->Cube.ledValues[coluna][linha][andar / 2] == true) {
-            /* printf("\nUpdating Cube[%d][%d][%d]\n", linha, coluna, andar /
-             * 2); */
             if (coluna < 2) {
               expanderVal1 =
                   expanderVal1 &
@@ -164,17 +152,10 @@ void *updateLedStatus(void *args) {
           }
         }
       }
-      // delay dos cálculos + manter leds ativos
-      /* printf("\n\nAndar: %d\n", andar / 2); */
       setExpanderVal(&c->Expander1, expanderVal1);
       setExpanderVal(&c->Expander2, expanderVal2);
       setExpanderVal(&c->Expander3, expanderVal3);
-      /* usleep(1000 * 1000); */
-      usleep(10000 / 6);
-      // baixo: 2
-      // medio baixo: 4
-      // menos bom: 7
-      // bom 8
+      usleep(10000 / 9);
 
       // reset
       expanderVal1 = 0xFFFF;
