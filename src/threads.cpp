@@ -96,6 +96,7 @@ void *animationCube1(void *args) {
   return nullptr;
 }
 
+// TODO: Update name to displayCube
 void *updateLedStatus(void *args) {
   CubeSystem *c = (CubeSystem *)args;
 
@@ -229,3 +230,7 @@ void *updateButtonStatus(void *args) {
 
   return nullptr;
 }
+
+// -------- Snake game // --------
+
+/* void *(void *args) { CubeSystem *c = (CubeSystem *)args; } */

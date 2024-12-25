@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <unistd.h>
 
 #include "../../include/components/init_comp.hpp"
 #include "../../include/components/tools.hpp"
