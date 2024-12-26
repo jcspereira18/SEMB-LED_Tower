@@ -33,7 +33,7 @@
 #define CLOCK_PIN 4
 
 typedef struct {
-  bool ledValues[ANDARES][COLUNAS][LINHAS];
+  int ledValues[ANDARES][COLUNAS][LINHAS];
 } LedCube;
 
 // TODO: Debouce buttons
