@@ -3,6 +3,7 @@
 
 #include "../include/components/init_comp.hpp"
 #include "../include/components/tools.hpp"
+#include "../include/snake/init_snake.hpp"
 #include "../include/threads.hpp"
 
 void *createCubeSystem(void *args) {
@@ -233,4 +234,30 @@ void *updateButtonStatus(void *args) {
 
 // -------- Snake game // --------
 
-/* void *(void *args) { CubeSystem *c = (CubeSystem *)args; } */
+void snakeGame(void *args) {
+  CubeSystem *c = (CubeSystem *)args;
+  // DisplayCube is being called
+  Snake *snake;
+  Food *food;
+
+  initializeGame(&c->Cube, snake, food);
+  int direction;
+
+  printf("Starting snake game\n");
+  printf("Enter direction: (0: +x, 1: -x, 2: +y, 3: -y, 4: +z, 5: -z):\n");
+  while (1) {
+    /* display_cube(cube); */
+    printf("Direction: ");
+    scanf("%d", &direction);
+
+    if (direction < 0 || direction >= 6) {
+      printf("Invalid direction! Try again.\n");
+      continue;
+    }
+
+    moveSnake(&c->Cube, snake, food, direction);
+
+    if (snake->gameOver == true)
+      return;
+ }
+}
