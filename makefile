@@ -7,12 +7,12 @@ INCLUDE_DIR = /home/pi/led_tower/include
 FINAL_DIR = /led_tower/build
 
 # Files to copy and compile
-CPPFILES = $(wildcard $(SRC_DIR)/*.cpp) $(wildcard $(SRC_DIR)/components/*.cpp)
-HPPFILES = $(wildcard $(INC_DIR)/*.hpp)
-COMPONENT_HPPFILES = $(wildcard $(INC_DIR)/components/*.hpp)
+CPPFILES = $(wildcard $(SRC_DIR)/*.cpp) $(wildcard $(SRC_DIR)/components/*.cpp) $(wildcard $(SRC_DIR)/snake/*.cpp)
+HPPFILES = $(wildcard $(INC_DIR)/*.hpp) $(wildcard $(INC_DIR)/components/*.hpp) $(wildcard $(INC_DIR)/snake/*.hpp)
+
 TARGET = $(BUILD_DIR)/main
-IP = 10.227.113.138
-IP2 = 192.168.20.94
+IP2 = 10.227.113.138
+IP = 192.168.146.94
 
 # Send the source files to the Raspberry Pi project directory
 # These functions are meant to be executed through ssh
@@ -26,8 +26,10 @@ sends:
 	scp main.cpp pi@$(IP):/home/pi/led_tower
 	scp $(wildcard $(SRC_DIR)/*.cpp) pi@$(IP):$(DST_DIR)
 	scp $(wildcard $(SRC_DIR)/components/*.cpp) pi@$(IP):$(DST_DIR)/components
+#	scp $(wildcard $(SRC_DIR)/snake/*.cpp) pi@$(IP):$(DST_DIR)/snake
 	scp $(wildcard $(INC_DIR)/*.hpp) pi@$(IP):$(INCLUDE_DIR)
 	scp $(wildcard $(INC_DIR)/components/*.hpp) pi@$(IP):$(INCLUDE_DIR)/components
+#	scp $(wildcard $(INC_DIR)/snake/*.hpp) pi@$(IP):$(INCLUDE_DIR)/snake
 	scp makefile pi@$(IP):/home/pi/led_tower
 	@echo "Files copied successfully."
 
