@@ -30,8 +30,16 @@ int main() {
     printf("[ERROR] - Cannot create rainAnimationThread\n");
     exit(EXIT_FAILURE);
   }
-  pthread_join(displayCubeThread, NULL);
 
+  // read Buttons
+  pthread_t readButtonsThread;
+  if (pthread_create(&readButtonsThread, NULL, readButtons, (void *)&c) !=
+      0) {
+    printf("[ERROR] - Cannot create readButtonsThread\n");
+    exit(EXIT_FAILURE);
+  }
+
+  pthread_join(displayCubeThread, NULL);
   // reset expanders and shifters to exit program
   pthread_t resetThread;
   if (pthread_create(&resetThread, NULL, globalReset, (void *)&c) != 0) {

@@ -35,22 +35,6 @@ void initCubeSystem(CubeSystem *s) {
   initButton(&s->Button25, 0b0100'0000);
   initButton(&s->Button26, 0b1000'0000);
 
-  // link expander to button
-  s->Expander1.Button1 = &s->Button21;
-  s->Expander1.Button2 = &s->Button12;
-  s->Expander1.Button3 = &s->Button22;
-  s->Expander1.Button4 = &s->Button11;
-
-  s->Expander2.Button1 = &s->Button13;
-  s->Expander2.Button2 = &s->Button14;
-  s->Expander2.Button3 = &s->Button23;
-  s->Expander2.Button4 = &s->Button24;
-
-  s->Expander3.Button1 = &s->Button15;
-  s->Expander3.Button2 = &s->Button16;
-  s->Expander3.Button3 = &s->Button25;
-  s->Expander3.Button4 = &s->Button26;
-
   // initialize expanders
   initExpander(&s->Expander1, MCP23017_I2C_ADDRESS_1, IODIRA, IODIRB, GPIOA,
                GPIOB, GPPUA, GPPUB, 0b0000'0011, 0b1100'0000, 0x00, 0x00);

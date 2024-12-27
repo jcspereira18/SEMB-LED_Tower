@@ -26,6 +26,6 @@ void *displayCube(void *args);
  */
 void *rainAnimation(void *args);
 
-void *updateButtonStatus(void *args);
+void *readButtons(void *args);
 
 #endif // THREADS_HPP

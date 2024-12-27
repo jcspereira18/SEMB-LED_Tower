@@ -24,6 +24,12 @@ void *globalReset(void *args) {
   return nullptr;
 }
 
+void *systemState(void *args) {
+  CubeSystem *c = (CubeSystem *)args;
+  while (1) {
+
+  }
+}
 void *rainAnimation(void *args) {
   CubeSystem *c = (CubeSystem *)args;
 
@@ -140,7 +146,7 @@ void *displayCube(void *args) {
   return nullptr;
 }
 
-void *updateButtonStatus(void *args) {
+void *readButtons(void *args) {
   CubeSystem *c = (CubeSystem *)args;
 
   uint16_t readingExp1 = 0;
