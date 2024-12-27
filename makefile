@@ -12,7 +12,7 @@ HPPFILES = $(wildcard $(INC_DIR)/*.hpp) $(wildcard $(INC_DIR)/components/*.hpp) 
 
 TARGET = $(BUILD_DIR)/main
 IP2 = 10.227.113.138
-IP = 192.168.146.94
+IP = 192.168.1.102
 
 # Send the source files to the Raspberry Pi project directory
 # These functions are meant to be executed through ssh
