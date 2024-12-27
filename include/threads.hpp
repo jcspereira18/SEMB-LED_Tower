@@ -19,16 +19,13 @@ void *globalReset(void *args);
 /**
  * @brief Loop to turn on or off the leds.
  */
-void *updateLedStatus(void *args);
-
+void *displayCube(void *args);
 
 /**
  * @brief Update led array to create rain effect.
  */
-void *animationCube1(void *args);
-
+void *rainAnimation(void *args);
 
 void *updateButtonStatus(void *args);
-
 
 #endif // THREADS_HPP

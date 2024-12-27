@@ -44,7 +44,7 @@ uint16_t createMaskWithOne(int pos) {
   return (uint16_t)(1 << pos);
 }
 
-void *animationCube1(void *args) {
+void *rainAnimation(void *args) {
   CubeSystem *c = (CubeSystem *)args;
 
   time_t startTime = time(NULL), currentTime = time(NULL);
@@ -96,7 +96,7 @@ void *animationCube1(void *args) {
   return nullptr;
 }
 
-void *updateLedStatus(void *args) {
+void *displayCube(void *args) {
   CubeSystem *c = (CubeSystem *)args;
 
   // c->Cube.ledValues[linha][coluna][andar]
