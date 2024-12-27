@@ -23,6 +23,7 @@ int main() {
     exit(EXIT_FAILURE);
   }
 
+  // generate rain animation
   pthread_t rainAnimationThread;
   if (pthread_create(&rainAnimationThread, NULL, rainAnimation, (void *)&c) !=
       0) {
@@ -31,6 +32,13 @@ int main() {
   }
   pthread_join(displayCubeThread, NULL);
 
+  // reset expanders and shifters to exit program
+  pthread_t resetThread;
+  if (pthread_create(&resetThread, NULL, globalReset, (void *)&c) != 0) {
+    printf("[ERROR] - Cannot create resetThread\n");
+    exit(EXIT_FAILURE);
+  }
+  pthread_join(resetThread, NULL);
   return 0;
 }
 // TODO: Fazer thread que quando clica em um botão, faz interrupt e liga um led!

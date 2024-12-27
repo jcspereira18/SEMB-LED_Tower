@@ -24,26 +24,6 @@ void *globalReset(void *args) {
   return nullptr;
 }
 
-uint16_t createMaskWithZero(int pos) {
-  // Ensure the position is within the valid range for 16 bits
-  if (pos < 0 || pos > 15) {
-    return 0xFFFF; // Return all ones if position is invalid
-  }
-
-  // Create a mask with a single 0 at the given position
-  return (uint16_t)(~(1 << pos));
-}
-
-uint16_t createMaskWithOne(int pos) {
-  // Ensure the position is within the valid range for 16 bits
-  if (pos < 0 || pos > 15) {
-    return 0x0000; // Return all zeros if position is invalid
-  }
-
-  // Create a mask with a single 1 at the given position
-  return (uint16_t)(1 << pos);
-}
-
 void *rainAnimation(void *args) {
   CubeSystem *c = (CubeSystem *)args;
 
@@ -95,6 +75,9 @@ void *rainAnimation(void *args) {
 
   return nullptr;
 }
+
+uint16_t createMaskWithZero(int pos);
+uint16_t createMaskWithOne(int pos);
 
 void *displayCube(void *args) {
   CubeSystem *c = (CubeSystem *)args;
@@ -228,4 +211,25 @@ void *updateButtonStatus(void *args) {
   }
 
   return nullptr;
+}
+// Auxiliar functions
+
+uint16_t createMaskWithZero(int pos) {
+  // Ensure the position is within the valid range for 16 bits
+  if (pos < 0 || pos > 15) {
+    return 0xFFFF; // Return all ones if position is invalid
+  }
+
+  // Create a mask with a single 0 at the given position
+  return (uint16_t)(~(1 << pos));
+}
+
+uint16_t createMaskWithOne(int pos) {
+  // Ensure the position is within the valid range for 16 bits
+  if (pos < 0 || pos > 15) {
+    return 0x0000; // Return all zeros if position is invalid
+  }
+
+  // Create a mask with a single 1 at the given position
+  return (uint16_t)(1 << pos);
 }
