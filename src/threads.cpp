@@ -38,19 +38,19 @@ void *systemStateTransitions(void *args) {
     currentState = c->SystemState;
     pthread_mutex_unlock(&c->StateMutex);
 
-    if (c->Expander2.Button2.state == TRUE) {
+    if (c->Expander2.Button2.state) {
       c->SystemState = RAIN;
       printf("condition 1 is true\n");
 
-    } else if (c->Expander3.Button1.state == TRUE) {
+    } else if (c->Expander3.Button1.state) {
       c->SystemState = SNAKE;
       printf("condition 2 is true\n");
 
-    } else if (c->Expander2.Button4.state == TRUE) {
+    } else if (c->Expander2.Button4.state) {
       c->SystemState = IDLE;
       printf("condition 3 is true\n");
 
-    } else if (c->Expander3.Button3.state == TRUE) {
+    } else if (c->Expander3.Button3.state) {
       c->SystemState = STOP;
       printf("condition 4 is true\n");
     }
