@@ -32,7 +32,7 @@
 #define DATA_PIN 17
 #define CLOCK_PIN 4
 
-typedef enum { READY, IDLE, RAIN, SNAKE, STOP } SystemStates;
+typedef enum { IDLE, RAIN, SNAKE, SNAKE_END, STOP } SystemStates;
 
 typedef struct {
   bool ledValue[ANDARES][COLUNAS][LINHAS];
