@@ -41,7 +41,7 @@ void initCubeSystem(CubeSystem *s) {
   // initialize shifters
   initShifter(&s->Shifter1, DATA_PIN, CLOCK_PIN, 0x0001);
 
-  s->SystemState = READY;
+  s->SystemState = IDLE;
   s->StateMutex = PTHREAD_MUTEX_INITIALIZER;
 
   return;
