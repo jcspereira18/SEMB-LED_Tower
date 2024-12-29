@@ -32,9 +32,11 @@
 #define DATA_PIN 17
 #define CLOCK_PIN 4
 
+typedef enum { READY, IDLE, RAIN, SNAKE, STOP } SystemStates;
+
 typedef struct {
-  bool ledValues[ANDARES][COLUNAS][LINHAS];
-} LedCube;
+  bool ledValue[ANDARES][COLUNAS][LINHAS];
+} LedValues;
 
 // TODO: Debouce buttons
 typedef struct {
@@ -57,10 +59,10 @@ typedef struct {
   uint8_t portGPPUB;  // Pull-up resistor configuration for Port B
   uint8_t valueGPA;   // Pin values for Port A
   uint8_t valueGPB;   // Pin values for Port B
-  Button *Button1;
-  Button *Button2; // [1] [2]
-  Button *Button3; // [3] [4]
-  Button *Button4;
+  Button Button1;
+  Button Button2; // [1] [2]
+  Button Button3; // [3] [4]
+  Button Button4;
 } Expander;
 
 // 74HC164
@@ -71,7 +73,7 @@ typedef struct {
 } Shifter;
 
 typedef struct {
-  LedCube Cube;
+  LedValues LedArray;
   Expander Expander1; // U1
   Expander Expander2; // U2
   Expander Expander3; // U3
@@ -88,6 +90,8 @@ typedef struct {
   Button Button24;
   Button Button25;
   Button Button26;
+  SystemStates SystemState;
+  pthread_mutex_t StateMutex;
 } CubeSystem;
 
 /**
