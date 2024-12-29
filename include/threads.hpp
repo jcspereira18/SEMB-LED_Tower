@@ -26,7 +26,6 @@ void *displayCube(void *args);
 /**
  * @brief Update led array to create rain effect.
  */
-void rainAnimation(LedValues *l, SystemStates *state);
 
 void *readButtons(void *args);
 

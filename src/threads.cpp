@@ -4,6 +4,8 @@
 
 #include "../include/components/init_comp.hpp"
 #include "../include/components/tools.hpp"
+#include "../include/modes/animations.hpp"
+#include "../include/modes/snake.hpp"
 #include "../include/threads.hpp"
 
 // TODO: check function inputs
@@ -39,20 +41,17 @@ void *systemStateTransitions(void *args) {
     pthread_mutex_unlock(&c->StateMutex);
 
     if (c->Expander2.Button2.state) {
+      c->SystemState = IDLE;
+      printf("condition 0 is true\n");
+    } else if (c->Expander3.Button1.state) {
       c->SystemState = RAIN;
       printf("condition 1 is true\n");
-
-    } else if (c->Expander3.Button1.state) {
+    } else if (c->Expander2.Button4.state) {
       c->SystemState = SNAKE;
       printf("condition 2 is true\n");
-
-    } else if (c->Expander2.Button4.state) {
-      c->SystemState = IDLE;
-      printf("condition 3 is true\n");
-
     } else if (c->Expander3.Button3.state) {
       c->SystemState = STOP;
-      printf("condition 4 is true\n");
+      printf("condition 3 is true\n");
     }
 
     printf("currentState: %d\n", c->SystemState);
@@ -68,16 +67,14 @@ void *systemStateActions(void *args) {
 
   while (1) {
     switch (c->SystemState) {
+    case IDLE:
+      fireworksAnimation(&c->LedArray, &c->SystemState);
+      break;
     case RAIN:
       rainAnimation(&c->LedArray, &c->SystemState);
       break;
-
     case SNAKE:
-      // snakeGame(c); // Placeholder for snake game logic
-      break;
-
-    case IDLE:
-      // idleAnimation(c); // Placeholder for idle animation
+      snakeGame(&c->LedArray, &c->SystemState, c);
       break;
 
     default:
@@ -86,49 +83,6 @@ void *systemStateActions(void *args) {
     usleep(100000);
   }
   return nullptr;
-}
-
-void rainAnimation(LedValues *l, SystemStates *state) {
-
-  clearLedValuesArray(l);
-
-  // Loop through all layers
-  for (int t = 0; *state == RAIN; t++) {
-    // Randomly generate raindrops on the top layer (z = 5)
-    for (int i = 0; i < 4;
-         i++) { // `dropRate` controls how many drops are added per frame
-      int x = rand() % 6;
-      int y = rand() % 6;
-      l->ledValue[x][y][5] = true; // Add a drop at the top layer
-    }
-
-    // Move all drops down one layer
-    for (int z = 0; z < 5; z++) { // Iterate from bottom to second-to-last layer
-      for (int x = 0; x < 6; x++) {
-        for (int y = 0; y < 6; y++) {
-          if (l->ledValue[x][y][z + 1]) {
-            l->ledValue[x][y][z] = true;      // Move the drop down
-            l->ledValue[x][y][z + 1] = false; // Turn off the old position
-          }
-        }
-      }
-    }
-
-    for (int x = 0; x < 6; x++) {
-      for (int y = 0; y < 6; y++) {
-        if (l->ledValue[x][y][0]) {
-          // Randomly decide whether to remove the drop in the bottom layer
-          if ((rand() % 100) < (50)) {
-            l->ledValue[x][y][0] = false; // Remove the drop
-          }
-        }
-      }
-    }
-    usleep(100000);
-  }
-  clearLedValuesArray(l);
-
-  return;
 }
 
 uint16_t createMaskWithZero(int pos);
