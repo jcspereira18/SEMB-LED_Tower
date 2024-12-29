@@ -107,3 +107,20 @@ bool debounceButton(Button *b, uint16_t reading) {
   }
   return false;
 }
+
+void clearLedValuesArray(LedValues *l) {
+  if (l == NULL) {
+    printf("[ERROR] - Invalid parameter in clearLedValuesArray\n");
+    exit(EXIT_FAILURE);
+  }
+
+  for (int x = 0; x < 6; x++) {
+    for (int y = 0; y < 6; y++) {
+      for (int z = 0; z < 6; z++) {
+        l->ledValue[x][y][z] = 0;
+      }
+    }
+  }
+
+  return;
+}
