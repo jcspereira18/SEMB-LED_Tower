@@ -1,7 +1,9 @@
 #ifndef THREADS_HPP
 #define THREADS_HPP
 
+#include "components/init_comp.hpp"
 #include <unistd.h>
+
 /**
  * @brief Initialize following components:
  * 1 * Led array,
@@ -24,8 +26,10 @@ void *displayCube(void *args);
 /**
  * @brief Update led array to create rain effect.
  */
-void *rainAnimation(void *args);
+void rainAnimation(LedValues *l, SystemStates *state);
 
 void *readButtons(void *args);
 
+void *systemStateTransitions(void *args);
+void *systemStateActions(void *args);
 #endif // THREADS_HPP
