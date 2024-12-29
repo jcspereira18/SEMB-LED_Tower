@@ -16,6 +16,7 @@ int main() {
   }
   pthread_join(initCubeSystemThread, NULL);
 
+
   // Update led display
   pthread_t displayCubeThread;
   if (pthread_create(&displayCubeThread, NULL, displayCube, (void *)&c) != 0) {
