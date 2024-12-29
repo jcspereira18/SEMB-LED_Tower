@@ -7,8 +7,8 @@ INCLUDE_DIR = /home/pi/led_tower/include
 FINAL_DIR = /led_tower/build
 
 # Files to copy and compile
-CPPFILES = $(wildcard $(SRC_DIR)/*.cpp) $(wildcard $(SRC_DIR)/components/*.cpp) $(wildcard $(SRC_DIR)/snake/*.cpp)
-HPPFILES = $(wildcard $(INC_DIR)/*.hpp) $(wildcard $(INC_DIR)/components/*.hpp) $(wildcard $(INC_DIR)/snake/*.hpp)
+CPPFILES = $(wildcard $(SRC_DIR)/*.cpp) $(wildcard $(SRC_DIR)/components/*.cpp) $(wildcard $(SRC_DIR)/modes/*.cpp)
+HPPFILES = $(wildcard $(INC_DIR)/*.hpp) $(wildcard $(INC_DIR)/components/*.hpp) $(wildcard $(INC_DIR)/modes/*.hpp)
 
 TARGET = $(BUILD_DIR)/main
 IP2 = 10.227.113.138
@@ -26,16 +26,16 @@ sends:
 	scp main.cpp pi@$(IP):/home/pi/led_tower
 	scp $(wildcard $(SRC_DIR)/*.cpp) pi@$(IP):$(DST_DIR)
 	scp $(wildcard $(SRC_DIR)/components/*.cpp) pi@$(IP):$(DST_DIR)/components
-#	scp $(wildcard $(SRC_DIR)/snake/*.cpp) pi@$(IP):$(DST_DIR)/snake
+	scp $(wildcard $(SRC_DIR)/modes/*.cpp) pi@$(IP):$(DST_DIR)/modes
 	scp $(wildcard $(INC_DIR)/*.hpp) pi@$(IP):$(INCLUDE_DIR)
 	scp $(wildcard $(INC_DIR)/components/*.hpp) pi@$(IP):$(INCLUDE_DIR)/components
-#	scp $(wildcard $(INC_DIR)/snake/*.hpp) pi@$(IP):$(INCLUDE_DIR)/snake
+	scp $(wildcard $(INC_DIR)/modes/*.hpp) pi@$(IP):$(INCLUDE_DIR)/modes
 	scp makefile pi@$(IP):/home/pi/led_tower
 	@echo "Files copied successfully."
 
 compiles:
 	@echo "--------------------Compiling source files...------------------------"
-	ssh pi@$(IP) "g++ -I$(INCLUDE_DIR) /home/pi/led_tower/main.cpp $(DST_DIR)/*.cpp $(DST_DIR)/components/*.cpp -o $(BUILD_DIR)/main -lwiringPi"
+	ssh pi@$(IP) "g++ -I$(INCLUDE_DIR) /home/pi/led_tower/main.cpp $(DST_DIR)/*.cpp $(DST_DIR)/components/*.cpp $(DST_DIR)/modes/*.cpp -o $(BUILD_DIR)/main -lwiringPi"
 	@echo "Compilation successful."
 
 runs:
