@@ -6,6 +6,8 @@
 #include "../include/components/tools.hpp"
 #include "../include/threads.hpp"
 
+// TODO: check function inputs
+
 void *createCubeSystem(void *args) {
   CubeSystem *c = (CubeSystem *)args;
 
@@ -67,7 +69,6 @@ void *systemStateActions(void *args) {
   while (1) {
     switch (c->SystemState) {
     case RAIN:
-      printf("Switching to raining\n");
       rainAnimation(&c->LedArray, &c->SystemState);
       break;
 
@@ -89,14 +90,7 @@ void *systemStateActions(void *args) {
 
 void rainAnimation(LedValues *l, SystemStates *state) {
 
-  // Clear all LEDs
-  for (int z = 0; z < 6; z++) {
-    for (int x = 0; x < 6; x++) {
-      for (int y = 0; y < 6; y++) {
-        l->ledValue[x][y][z] = false;
-      }
-    }
-  }
+  clearLedValuesArray(l);
 
   // Loop through all layers
   for (int t = 0; *state == RAIN; t++) {
@@ -132,6 +126,8 @@ void rainAnimation(LedValues *l, SystemStates *state) {
     }
     usleep(100000);
   }
+  clearLedValuesArray(l);
+
   return;
 }
 
