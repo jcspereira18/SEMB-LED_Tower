@@ -1,9 +1,14 @@
+#include <pthread.h>
 #include <stdio.h>
 #include <time.h>
 
 #include "../include/components/init_comp.hpp"
 #include "../include/components/tools.hpp"
+#include "../include/modes/animations.hpp"
+#include "../include/modes/snake.hpp"
 #include "../include/threads.hpp"
+
+// TODO: check function inputs
 
 void *createCubeSystem(void *args) {
   CubeSystem *c = (CubeSystem *)args;
@@ -24,79 +29,66 @@ void *globalReset(void *args) {
   return nullptr;
 }
 
-uint16_t createMaskWithZero(int pos) {
-  // Ensure the position is within the valid range for 16 bits
-  if (pos < 0 || pos > 15) {
-    return 0xFFFF; // Return all ones if position is invalid
-  }
-
-  // Create a mask with a single 0 at the given position
-  return (uint16_t)(~(1 << pos));
-}
-
-uint16_t createMaskWithOne(int pos) {
-  // Ensure the position is within the valid range for 16 bits
-  if (pos < 0 || pos > 15) {
-    return 0x0000; // Return all zeros if position is invalid
-  }
-
-  // Create a mask with a single 1 at the given position
-  return (uint16_t)(1 << pos);
-}
-
-void *animationCube1(void *args) {
+void *systemStateTransitions(void *args) {
   CubeSystem *c = (CubeSystem *)args;
 
-  time_t startTime = time(NULL), currentTime = time(NULL);
+  int previousState = -1;
+  int currentState = -1;
 
-  // Clear all LEDs
-  for (int z = 0; z < 6; z++) {
-    for (int x = 0; x < 6; x++) {
-      for (int y = 0; y < 6; y++) {
-        c->Cube.ledValues[x][y][z] = false;
-      }
+  while (1) {
+    pthread_mutex_lock(&c->StateMutex);
+    currentState = c->SystemState;
+    pthread_mutex_unlock(&c->StateMutex);
+
+    if (c->Expander2.Button2.state) {
+      c->SystemState = IDLE;
+      printf("condition 0 is true\n");
+    } else if (c->Expander3.Button1.state) {
+      c->SystemState = RAIN;
+      printf("condition 1 is true\n");
+    } else if (c->Expander2.Button4.state) {
+      c->SystemState = SNAKE;
+      printf("condition 2 is true\n");
+    } else if (c->Expander3.Button3.state) {
+      c->SystemState = STOP;
+      printf("condition 3 is true\n");
     }
+
+    printf("currentState: %d\n", c->SystemState);
+    pthread_mutex_unlock(&c->StateMutex);
+
+    sleep(1);
   }
-  // Loop through all layers
-  for (int t = 0; difftime(currentTime, startTime) <= 10 * 60 * 60; t++) {
-    // Randomly generate raindrops on the top layer (z = 5)
-    for (int i = 0; i < 4;
-         i++) { // `dropRate` controls how many drops are added per frame
-      int x = rand() % 6;
-      int y = rand() % 6;
-      c->Cube.ledValues[x][y][5] = true; // Add a drop at the top layer
-    }
-
-    // Move all drops down one layer
-    for (int z = 0; z < 5; z++) { // Iterate from bottom to second-to-last layer
-      for (int x = 0; x < 6; x++) {
-        for (int y = 0; y < 6; y++) {
-          if (c->Cube.ledValues[x][y][z + 1]) {
-            c->Cube.ledValues[x][y][z] = true;      // Move the drop down
-            c->Cube.ledValues[x][y][z + 1] = false; // Turn off the old position
-          }
-        }
-      }
-    }
-
-    for (int x = 0; x < 6; x++) {
-      for (int y = 0; y < 6; y++) {
-        if (c->Cube.ledValues[x][y][0]) {
-          // Randomly decide whether to remove the drop in the bottom layer
-          if ((rand() % 100) < (50)) {
-            c->Cube.ledValues[x][y][0] = false; // Remove the drop
-          }
-        }
-      }
-    }
-    usleep(100000);
-    currentTime = time(NULL);
-  }
-
   return nullptr;
 }
 
-void *updateLedStatus(void *args) {
+void *systemStateActions(void *args) {
+  CubeSystem *c = (CubeSystem *)args;
+
+  while (1) {
+    switch (c->SystemState) {
+    case IDLE:
+      fireworksAnimation(&c->LedArray, &c->SystemState);
+      break;
+    case RAIN:
+      rainAnimation(&c->LedArray, &c->SystemState);
+      break;
+    case SNAKE:
+      snakeGame(&c->LedArray, &c->SystemState, c);
+      break;
+
+    default:
+      break;
+    }
+    usleep(100000);
+  }
+  return nullptr;
+}
+
+uint16_t createMaskWithZero(int pos);
+uint16_t createMaskWithOne(int pos);
+
+void *displayCube(void *args) {
   CubeSystem *c = (CubeSystem *)args;
 
   // c->Cube.ledValues[linha][coluna][andar]
@@ -111,9 +103,7 @@ void *updateLedStatus(void *args) {
   if (c->Shifter1.data == 0)
     setShifterVal(&c->Shifter1, 1);
 
-  while (difftime(currentTime, startTime) <= 60 * 60) {
-    currentTime = time(NULL);
-
+  while (c->SystemState != STOP) {
     // Interate for each floor not considering imaginary floors
     for (int andar = 0; andar < 12; andar = andar + 2) {
       // Calculate GPA_ and GPB_ for each floor
@@ -121,7 +111,7 @@ void *updateLedStatus(void *args) {
         for (int linha = 0; linha < 6; linha++) {
 
           // Update values for each coluna and linha
-          if (c->Cube.ledValues[coluna][linha][andar / 2] == true) {
+          if (c->LedArray.ledValue[coluna][linha][andar / 2] == true) {
             if (coluna < 2) {
               expanderVal1 =
                   expanderVal1 &
@@ -141,6 +131,7 @@ void *updateLedStatus(void *args) {
       setExpanderVal(&c->Expander1, expanderVal1);
       setExpanderVal(&c->Expander2, expanderVal2);
       setExpanderVal(&c->Expander3, expanderVal3);
+
       usleep(10000 / 10);
 
       // reset
@@ -157,7 +148,7 @@ void *updateLedStatus(void *args) {
   return nullptr;
 }
 
-void *updateButtonStatus(void *args) {
+void *readButtons(void *args) {
   CubeSystem *c = (CubeSystem *)args;
 
   uint16_t readingExp1 = 0;
@@ -169,63 +160,83 @@ void *updateButtonStatus(void *args) {
     readingExp2 = readExpander(&c->Expander2);
     readingExp3 = readExpander(&c->Expander3);
 
-    debounceButton(&c->Button11, ~readingExp1 & 0b0100'0000'0000'0000);
-    debounceButton(&c->Button12, ~readingExp1 & 0b0000'0000'0000'0010);
-    debounceButton(&c->Button21, ~readingExp1 & 0b1000'0000'0000'0000);
-    debounceButton(&c->Button22, ~readingExp1 & 0b0000'0000'0000'0001);
+    // TODO: update all buttons to use the expanders instead of system
+    // buttons...
+    debounceButton(&c->Expander1.Button1, ~readingExp1 & 0b0100'0000'0000'0000);
+    debounceButton(&c->Expander1.Button2, ~readingExp1 & 0b0000'0000'0000'0010);
+    debounceButton(&c->Expander1.Button3, ~readingExp1 & 0b1000'0000'0000'0000);
+    debounceButton(&c->Expander1.Button4, ~readingExp1 & 0b0000'0000'0000'0001);
+    debounceButton(&c->Expander2.Button1, ~readingExp2 & 0b0100'0000'0000'0000);
+    debounceButton(&c->Expander2.Button2, ~readingExp2 & 0b0000'0000'0000'0010);
+    debounceButton(&c->Expander2.Button3, ~readingExp2 & 0b1000'0000'0000'0000);
+    debounceButton(&c->Expander2.Button4, ~readingExp2 & 0b0000'0000'0000'0001);
+    debounceButton(&c->Expander3.Button1, ~readingExp3 & 0b0100'0000'0000'0000);
+    debounceButton(&c->Expander3.Button2, ~readingExp3 & 0b0000'0000'0000'0010);
+    debounceButton(&c->Expander3.Button3, ~readingExp3 & 0b1000'0000'0000'0000);
+    debounceButton(&c->Expander3.Button4, ~readingExp3 & 0b0000'0000'0000'0001);
 
-    debounceButton(&c->Button13, ~readingExp2 & 0b0100'0000'0000'0000);
-    debounceButton(&c->Button14, ~readingExp2 & 0b0000'0000'0000'0010);
-    debounceButton(&c->Button23, ~readingExp2 & 0b1000'0000'0000'0000);
-    debounceButton(&c->Button24, ~readingExp2 & 0b0000'0000'0000'0001);
-
-    debounceButton(&c->Button15, ~readingExp3 & 0b0100'0000'0000'0000);
-    debounceButton(&c->Button16, ~readingExp3 & 0b0000'0000'0000'0010);
-    debounceButton(&c->Button25, ~readingExp3 & 0b1000'0000'0000'0000);
-    debounceButton(&c->Button26, ~readingExp3 & 0b0000'0000'0000'0001);
-
-    /* if (c->Button11.state == c->Button11.previousState) { */
-    /*   c->Button11.state = ~readingExp1 & 0b0100'0000'0000'0000; */
-    /* } */
-
-    if (c->Button11.state) {
-      printf("Button 11 is pressed\n");
-    }
-    if (c->Button12.state) {
-      printf("Button 12 is pressed\n");
-    }
-    if (c->Button13.state) {
-      printf("Button 13 is pressed\n");
-    }
-    if (c->Button14.state) {
-      printf("Button 14 is pressed\n");
-    }
-    if (c->Button15.state) {
-      printf("Button 15 is pressed\n");
-    }
-    if (c->Button16.state) {
-      printf("Button 16 is pressed\n");
-    }
-    if (c->Button21.state) {
-      printf("Button 21 is pressed\n");
-    }
-    if (c->Button22.state) {
-      printf("Button 22 is pressed\n");
-    }
-    if (c->Button23.state) {
-      printf("Button 23 is pressed\n");
-    }
-    if (c->Button24.state) {
-      printf("Button 24 is pressed\n");
-    }
-    if (c->Button25.state) {
-      printf("Button 25 is pressed\n");
-    }
-    if (c->Button26.state) {
-      printf("Button 26 is pressed\n");
+    // enable and disable prints
+    if (0) {
+      if (c->Expander1.Button1.state) {
+        printf("Button 11 is pressed\n");
+      }
+      if (c->Expander1.Button2.state) {
+        printf("Button 12 is pressed\n");
+      }
+      if (c->Expander1.Button3.state) {
+        printf("Button 13 is pressed\n");
+      }
+      if (c->Expander1.Button4.state) {
+        printf("Button 14 is pressed\n");
+      }
+      if (c->Expander2.Button1.state) {
+        printf("Button 21 is pressed\n");
+      }
+      if (c->Expander2.Button2.state) {
+        printf("Button 22 is pressed\n");
+      }
+      if (c->Expander2.Button3.state) {
+        printf("Button 23 is pressed\n");
+      }
+      if (c->Expander2.Button4.state) {
+        printf("Button 24 is pressed\n");
+      }
+      if (c->Expander3.Button1.state) {
+        printf("Button 31 is pressed\n");
+      }
+      if (c->Expander3.Button2.state) {
+        printf("Button 32 is pressed\n");
+      }
+      if (c->Expander3.Button3.state) {
+        printf("Button 33 is pressed\n");
+      }
+      if (c->Expander3.Button4.state) {
+        printf("Button 34 is pressed\n");
+      }
     }
     usleep(100'000 / 6);
   }
 
   return nullptr;
+}
+// Auxiliar functions
+
+uint16_t createMaskWithZero(int pos) {
+  // Ensure the position is within the valid range for 16 bits
+  if (pos < 0 || pos > 15) {
+    return 0xFFFF; // Return all ones if position is invalid
+  }
+
+  // Create a mask with a single 0 at the given position
+  return (uint16_t)(~(1 << pos));
+}
+
+uint16_t createMaskWithOne(int pos) {
+  // Ensure the position is within the valid range for 16 bits
+  if (pos < 0 || pos > 15) {
+    return 0x0000; // Return all zeros if position is invalid
+  }
+
+  // Create a mask with a single 1 at the given position
+  return (uint16_t)(1 << pos);
 }

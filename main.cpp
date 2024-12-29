@@ -4,45 +4,55 @@
 #include "include/components/init_comp.hpp"
 #include "include/threads.hpp"
 
-void create_thread(pthread_t *thread, void *(*start_routine)(void *), void *arg,
-                   const char *error_message) {
-  if (pthread_create(thread, NULL, start_routine, arg) != 0) {
-    printf("[ERROR] - %s\n", error_message);
-    exit(EXIT_FAILURE);
-  }
-}
-
 int main() {
   CubeSystem c; // System struct
 
-  pthread_t initCubeSystemThread, // Initialize system
-      globalResetThread,          // Set global variables to
-      updateLedStatusThread,      // Update LED status
-      animationCube1Thread;       // Set values of cube to create animation
-
-  // Initialize Cube System
-  create_thread(&initCubeSystemThread, createCubeSystem, (void *)&c,
-                "Cannot create cube system thread");
+  // Initialize Cube system
+  pthread_t initCubeSystemThread;
+  if (pthread_create(&initCubeSystemThread, NULL, createCubeSystem,
+                     (void *)&c) != 0) {
+    printf("[ERROR] - Cannot create initCubeSystemThread\n");
+    exit(EXIT_FAILURE);
+  }
   pthread_join(initCubeSystemThread, NULL);
 
-  // Update LED Status
-  create_thread(&updateLedStatusThread, updateLedStatus, (void *)&c,
-                "Cannot create update LED status thread");
-  create_thread(&animationCube1Thread, animationCube1, (void *)&c,
-                "Cannot create update LED status thread");
 
-  pthread_t updateButtonStatusThread;
-  create_thread(&updateButtonStatusThread, updateButtonStatus, (void *)&c,
-                "Cannot create updateButtonStatusThread");
+  // Update led display
+  pthread_t displayCubeThread;
+  if (pthread_create(&displayCubeThread, NULL, displayCube, (void *)&c) != 0) {
+    printf("[ERROR] - Cannot create displayCube\n");
+    exit(EXIT_FAILURE);
+  }
 
-  pthread_join(updateLedStatusThread, NULL);
-  pthread_join(animationCube1Thread, NULL);
+  // read Buttons
+  pthread_t readButtonsThread;
+  if (pthread_create(&readButtonsThread, NULL, readButtons, (void *)&c) != 0) {
+    printf("[ERROR] - Cannot create readButtonsThread\n");
+    exit(EXIT_FAILURE);
+  }
 
-  // Reset Cube before exiting program
-  create_thread(&globalResetThread, globalReset, (void *)&c,
-                "Cannot create global reset thread");
-  pthread_join(updateLedStatusThread, NULL);
+  pthread_t systemTransitionsThread;
+  if (pthread_create(&systemTransitionsThread, NULL, systemStateTransitions,
+                     (void *)&c) != 0) {
+    printf("[ERROR] - Cannot create readButtonsThread\n");
+    exit(EXIT_FAILURE);
+  }
 
+  pthread_t systemActionsThread;
+  if (pthread_create(&systemTransitionsThread, NULL, systemStateActions,
+                     (void *)&c) != 0) {
+    printf("[ERROR] - Cannot create systemActionsThread\n");
+    exit(EXIT_FAILURE);
+  }
+
+  pthread_join(displayCubeThread, NULL);
+  // reset expanders and shifters to exit program
+  pthread_t resetThread;
+  if (pthread_create(&resetThread, NULL, globalReset, (void *)&c) != 0) {
+    printf("[ERROR] - Cannot create resetThread\n");
+    exit(EXIT_FAILURE);
+  }
+  pthread_join(resetThread, NULL);
   return 0;
 }
 // TODO: Fazer thread que quando clica em um botão, faz interrupt e liga um led!

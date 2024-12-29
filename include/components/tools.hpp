@@ -12,5 +12,6 @@ uint16_t readExpander(Expander *e);
 void readButtons(Expander *expander);
 void goToNextcycle(Shifter *s);
 bool debounceButton(Button *b, uint16_t reading);
+void clearLedValuesArray(LedValues *l);
 
 #endif // TOOLS_HPP
