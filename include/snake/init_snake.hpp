@@ -26,7 +26,7 @@ typedef struct {
   int x, y, z;
 } Food;
 
-void initializeGame(LedCube *c, Snake *s, Food *f);
-void moveSnake(LedCube *c, Snake *s, Food *f, int direction);
+void initializeGame(LedValues *c, Snake *s, Food *f);
+void moveSnake(LedValues *c, Snake *s, Food *f, int direction);
 
 #endif // INIT_SNAKE_HPP

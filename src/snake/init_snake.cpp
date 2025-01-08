@@ -9,26 +9,26 @@
 Direction directions[] = {
     {1, 0, 0}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}, {0, 0, 1}, {0, 0, -1}
 };
-void placeFood(LedCube *c, Food *f, Snake *s) {
+void placeFood(LedValues *c, Food *f, Snake *s) {
   // TODO: CHECK POINTERS
   int randomX, randomY, randomZ;
-  while (c->ledValues[randomX][randomY][randomZ] != 2 | s->gameOver == false) {
+  while (c->ledValue[randomX][randomY][randomZ] != 2 | s->gameOver == false) {
     randomX = rand() % DIMENSION;
     randomY = rand() % DIMENSION;
     randomZ = rand() % DIMENSION;
-    if (c->ledValues[randomX][randomY][randomZ] == 1) {
+    if (c->ledValue[randomX][randomY][randomZ] == 1) {
 
       printf("[INFO] Cannot place food at: %d %d %d", randomX, randomY,
              randomZ);
       continue;
     }
     printf("[INFO] Placing food at: %d %d %d", randomX, randomY, randomZ);
-    c->ledValues[randomX][randomY][randomZ] = 2;
+    c->ledValue[randomX][randomY][randomZ] = 2;
     return;
   }
 }
 
-void initializeGame(LedCube *c, Snake *s, Food *f) {
+void initializeGame(LedValues *c, Snake *s, Food *f) {
   s->gameOver = false;
 
   // TODO: create clear ledValues function
@@ -36,7 +36,7 @@ void initializeGame(LedCube *c, Snake *s, Food *f) {
   for (int x = 0; x > DIMENSION; x++) {
     for (int y = 0; y > DIMENSION; y++) {
       for (int z = 0; z > DIMENSION; z++) {
-        c->ledValues[x][y][z] = 0;
+        c->ledValue[x][y][z] = 0;
       }
     }
   }
@@ -49,16 +49,16 @@ void initializeGame(LedCube *c, Snake *s, Food *f) {
   s->body[0].z = DIMENSION / 2;
 
   // Place snake in the middle
-  c->ledValues[s->body[0].x][s->body[0].y][s->body[0].z] = 1;
+  c->ledValue[s->body[0].x][s->body[0].y][s->body[0].z] = 1;
 
   // Place initial food
   placeFood(c, f, s);
 }
 
-void moveSnake(LedCube *c, Snake *s, Food *f, int direction) {
+void moveSnake(LedValues *c, Snake *s, Food *f, int direction) {
     int newX = s->body[0].x + directions[direction].dx;
   // Clear tail
-  c->ledValues[s->body[s->length - 1].x][s->body[s->length - 1].y]
+  c->ledValue[s->body[s->length - 1].x][s->body[s->length - 1].y]
               [s->body[s->length - 1].z] = 0;
 
   // Shift snake body forward

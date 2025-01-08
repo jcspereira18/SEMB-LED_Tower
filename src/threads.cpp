@@ -42,22 +42,22 @@ void *systemStateTransitions(void *args) {
 
     if (c->Expander2.Button2.state) {
       c->SystemState = IDLE;
-      printf("condition 0 is true\n");
+      /* printf("condition 0 is true\n"); */
     } else if (c->Expander3.Button1.state) {
       c->SystemState = RAIN;
-      printf("condition 1 is true\n");
+      /* printf("condition 1 is true\n"); */
     } else if (c->Expander2.Button4.state) {
       c->SystemState = SNAKE;
-      printf("condition 2 is true\n");
+      /* printf("condition 2 is true\n"); */
     } else if (c->Expander3.Button3.state) {
       c->SystemState = STOP;
-      printf("condition 3 is true\n");
+      /* printf("condition 3 is true\n"); */
     }
 
-    printf("currentState: %d\n", c->SystemState);
+    /* printf("currentState: %d\n", c->SystemState); */
     pthread_mutex_unlock(&c->StateMutex);
 
-    sleep(1);
+    usleep(250000 / 4);
   }
   return nullptr;
 }
