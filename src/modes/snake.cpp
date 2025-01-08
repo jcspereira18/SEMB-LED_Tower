@@ -84,16 +84,24 @@ void resetGame(LedValues *l, SnakeQueue *snakeQueue, int snake[6][6][6], int *he
     initSnakeQueue(snakeQueue);
 
     // Reset snake position and length
+    *length = 3; // Snake starts with three segments
     *head_x = 2;
     *head_y = 2;
     *head_z = 2;
-    *length = 1;
 
-    // Place the initial snake head
-    snake[*head_x][*head_y][*head_z] = *length;
-    l->ledValue[*head_x][*head_y][*head_z] = true;
-    Position head = {*head_x, *head_y, *head_z};
-    enqueue(snakeQueue, head);
+    // Initialize the snake body
+    Position segments[3] = {
+        {2, 2, 0}, // Tail segment
+        {2, 2, 1}, // Middle segment
+        {2, 2, 2}  // Head segment
+    };
+
+    for (int i = 0; i < *length; i++) {
+        Position pos = segments[i];
+        snake[pos.x][pos.y][pos.z] = i + 1; // Set length values in the array
+        l->ledValue[pos.x][pos.y][pos.z] = true; // Turn on the corresponding LED
+        enqueue(snakeQueue, pos); // Add to the queue
+    }
 
     // Generate new food position
     do {
@@ -156,7 +164,7 @@ void snakeGame(LedValues *l, SystemStates *state, CubeSystem *c) {
             }
 
             // Reset the game state
-            resetGame(l, &snakeQueue, snake, &head_x, &head_y, &head_z, &length, &food_x, &food_y, &food_z);:
+            resetGame(l, &snakeQueue, snake, &head_x, &head_y, &head_z, &length, &food_x, &food_y, &food_z);
             foodState = 1; // Reset the food blinking state
             continue;
         }
