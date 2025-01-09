@@ -12,7 +12,7 @@ HPPFILES = $(wildcard $(INC_DIR)/*.hpp) $(wildcard $(INC_DIR)/components/*.hpp) 
 
 TARGET = $(BUILD_DIR)/main
 IP2 = 10.227.113.138
-IP = 192.168.1.102
+IP = 192.168.104.94
 
 # Send the source files to the Raspberry Pi project directory
 # These functions are meant to be executed through ssh
@@ -39,7 +39,7 @@ compiles:
 	@echo "Compilation successful."
 
 runs:
-	@ssh -t pi@$(IP) '.$(FINAL_DIR)/main'
+	@ssh -t pi@$(IP) 'sudo .$(FINAL_DIR)/main'
 	@echo "Execution finished."
 
 cleans:
@@ -52,7 +52,7 @@ compile:
 	g++ src/*.cpp -Iinclude -lwiringPi -o build/main
 
 run:
-	./build/main
+	sudo ./build/main
 
 all: compile run
 
