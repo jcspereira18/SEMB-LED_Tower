@@ -32,4 +32,5 @@ void *readButtons(void *args);
 
 void *systemStateTransitions(void *args);
 void *systemStateActions(void *args);
+void *updateSnakeDirection(void *arg);
 #endif // THREADS_HPP

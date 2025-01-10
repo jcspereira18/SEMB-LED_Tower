@@ -219,6 +219,38 @@ void *readButtons(void *args) {
 
   return nullptr;
 }
+
+int getDirectionFromInput(CubeSystem *c) {
+  if (c->Expander1.Button1.state)
+    return 5; // -z
+  else if (c->Expander1.Button2.state)
+    return 2; // +y
+  else if (c->Expander1.Button3.state)
+    return 1; // -x
+  else if (c->Expander1.Button4.state)
+    return 3; // -y
+  else if (c->Expander2.Button1.state)
+    return 4; // +z
+  else if (c->Expander2.Button3.state)
+    return 0; // +x
+  else
+    return -1; // No button pressed
+}
+
+void *updateSnakeDirection(void *arg) {
+  CubeSystem *c = (CubeSystem *)arg;
+
+  while (true) {
+    int newDirection = getDirectionFromInput(c);
+
+    if (newDirection != -1) { // Update only if a button is pressed
+      pthread_mutex_lock(&c->directionMutex);
+      c->SnakeDirection = newDirection;
+      pthread_mutex_unlock(&c->directionMutex);
+    }
+  }
+  return nullptr;
+}
 // Auxiliar functions
 
 uint16_t createMaskWithZero(int pos) {
