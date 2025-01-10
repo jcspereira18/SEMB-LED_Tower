@@ -42,24 +42,31 @@ int main() {
 
   // Scheduliing attributes
   pthread_attr_t initAttributes;
+  pthread_attr_t displayAttr;
   pthread_attr_t RRthreads;
 
   pthread_attr_init(&initAttributes);
+  pthread_attr_init(&displayAttr);
   pthread_attr_init(&RRthreads);
 
   pthread_attr_setschedpolicy(&initAttributes, SCHED_FIFO);
+  pthread_attr_setschedpolicy(&displayAttr, SCHED_RR);
   pthread_attr_setschedpolicy(&RRthreads, SCHED_RR);
 
   struct sched_param initParam;
+  struct sched_param displayParam;
   struct sched_param RRthreadsParam;
 
-  initParam.sched_priority = 2; // Higher means higher prio.
+  initParam.sched_priority = 3; // Higher means higher prio.
+  displayParam.sched_priority = 2;
   RRthreadsParam.sched_priority = 1;
 
   pthread_attr_setschedparam(&initAttributes, &initParam);
+  pthread_attr_setschedparam(&displayAttr, &displayParam);
   pthread_attr_setschedparam(&RRthreads, &RRthreadsParam);
 
   pthread_attr_setinheritsched(&initAttributes, PTHREAD_EXPLICIT_SCHED);
+  pthread_attr_setinheritsched(&displayAttr, PTHREAD_EXPLICIT_SCHED);
   pthread_attr_setinheritsched(&RRthreads, PTHREAD_EXPLICIT_SCHED);
 
   // Initialize Cube system
@@ -73,7 +80,7 @@ int main() {
 
   // Update led display
   pthread_t displayCubeThread;
-  if (pthread_create(&displayCubeThread, &RRthreads, displayCube, (void *)&c) !=
+  if (pthread_create(&displayCubeThread, &displayAttr, displayCube, (void *)&c) !=
       0) {
     printf("[ERROR] - Cannot create displayCube\n");
     exit(EXIT_FAILURE);
