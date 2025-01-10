@@ -43,6 +43,8 @@ void initCubeSystem(CubeSystem *s) {
 
   s->SystemState = IDLE;
   s->StateMutex = PTHREAD_MUTEX_INITIALIZER;
+  s->SnakeDirection = -1;
+  s->directionMutex = PTHREAD_MUTEX_INITIALIZER;
 
   return;
 }

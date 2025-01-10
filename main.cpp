@@ -1,14 +1,46 @@
 #include <pthread.h>
-#include <stdio.h>
 #include <sched.h>
+#include <stdio.h>
 
 #include "include/components/init_comp.hpp"
 #include "include/threads.hpp"
 
+int getDirectionFromInput(CubeSystem *c) {
+  if (c->Expander1.Button1.state)
+    return 5; // -z
+  else if (c->Expander1.Button2.state)
+    return 2; // +y
+  else if (c->Expander1.Button3.state)
+    return 1; // -x
+  else if (c->Expander1.Button4.state)
+    return 3; // -y
+  else if (c->Expander2.Button1.state)
+    return 4; // +z
+  else if (c->Expander2.Button3.state)
+    return 0; // +x
+  else
+    return -1; // No button pressed
+}
+
+void *updateSnakeDirection(void *arg) {
+  CubeSystem *c = (CubeSystem *)arg;
+
+  while (true) {
+    int newDirection = getDirectionFromInput(c);
+
+    if (newDirection != -1) { // Update only if a button is pressed
+      pthread_mutex_lock(&c->directionMutex);
+      c->SnakeDirection = newDirection;
+      pthread_mutex_unlock(&c->directionMutex);
+    }
+  }
+  return nullptr;
+}
+
 int main() {
   CubeSystem c; // System struct
 
-  // Scheduliing attributes 
+  // Scheduliing attributes
   pthread_attr_t initAttributes;
   pthread_attr_t RRthreads;
 
@@ -21,7 +53,7 @@ int main() {
   struct sched_param initParam;
   struct sched_param RRthreadsParam;
 
-  initParam.sched_priority = 2; // Higher means higher prio. 
+  initParam.sched_priority = 2; // Higher means higher prio.
   RRthreadsParam.sched_priority = 1;
 
   pthread_attr_setschedparam(&initAttributes, &initParam);
@@ -41,21 +73,30 @@ int main() {
 
   // Update led display
   pthread_t displayCubeThread;
-  if (pthread_create(&displayCubeThread, &RRthreads, displayCube, (void *)&c) != 0) {
+  if (pthread_create(&displayCubeThread, &RRthreads, displayCube, (void *)&c) !=
+      0) {
     printf("[ERROR] - Cannot create displayCube\n");
     exit(EXIT_FAILURE);
   }
 
   // read Buttons
   pthread_t readButtonsThread;
-  if (pthread_create(&readButtonsThread, &RRthreads, readButtons, (void *)&c) != 0) {
+  if (pthread_create(&readButtonsThread, &RRthreads, readButtons, (void *)&c) !=
+      0) {
     printf("[ERROR] - Cannot create readButtonsThread\n");
     exit(EXIT_FAILURE);
   }
 
+  pthread_t updateSnakeDirectionsThreads;
+  if (pthread_create(&updateSnakeDirectionsThreads, &RRthreads,
+                     updateSnakeDirection, (void *)&c) != 0) {
+    printf("[ERROR] - Cannot create updateSnakeDirectionsThreads\n");
+    exit(EXIT_FAILURE);
+  }
+
   pthread_t systemTransitionsThread;
-  if (pthread_create(&systemTransitionsThread, &RRthreads, systemStateTransitions,
-                     (void *)&c) != 0) {
+  if (pthread_create(&systemTransitionsThread, &RRthreads,
+                     systemStateTransitions, (void *)&c) != 0) {
     printf("[ERROR] - Cannot create readButtonsThread\n");
     exit(EXIT_FAILURE);
   }

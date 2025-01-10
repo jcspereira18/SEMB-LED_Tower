@@ -92,6 +92,8 @@ typedef struct {
   Button Button26;
   SystemStates SystemState;
   pthread_mutex_t StateMutex;
+  int SnakeDirection;
+  pthread_mutex_t directionMutex;
 } CubeSystem;
 
 /**
