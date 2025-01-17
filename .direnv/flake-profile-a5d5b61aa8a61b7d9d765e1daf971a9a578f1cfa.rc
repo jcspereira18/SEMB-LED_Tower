@@ -41,7 +41,7 @@ NIX_ENFORCE_NO_NATIVE='1'
 export NIX_ENFORCE_NO_NATIVE
 NIX_HARDENING_ENABLE='bindnow format fortify fortify3 pic relro stackprotector strictoverflow zerocallusedregs'
 export NIX_HARDENING_ENABLE
-NIX_LDFLAGS='-rpath /home/lucasgmf/Projects/test/outputs/out/lib  -L/nix/store/hfl44rys4gfh0r4dd7839ac657hdwsi4-wiringpi-3.10/lib -L/nix/store/hfl44rys4gfh0r4dd7839ac657hdwsi4-wiringpi-3.10/lib'
+NIX_LDFLAGS='-rpath /home/lucasgmf/Projects/SEMB-LED_Tower/outputs/out/lib  -L/nix/store/hfl44rys4gfh0r4dd7839ac657hdwsi4-wiringpi-3.10/lib -L/nix/store/hfl44rys4gfh0r4dd7839ac657hdwsi4-wiringpi-3.10/lib'
 export NIX_LDFLAGS
 NIX_NO_SELF_RPATH='1'
 NIX_PKG_CONFIG_WRAPPER_TARGET_HOST_x86_64_unknown_linux_gnu='1'
@@ -139,7 +139,7 @@ name='nix-shell-env'
 export name
 nativeBuildInputs='/nix/store/f1gamyykr0f8n4afy910ass2jx2g9zkv-pkg-config-wrapper-0.29.2 /nix/store/cdfrr9g239zw33b0c59a2rj5w021zpn9-clang-tools-18.1.8'
 export nativeBuildInputs
-out='/home/lucasgmf/Projects/test/outputs/out'
+out='/home/lucasgmf/Projects/SEMB-LED_Tower/outputs/out'
 export out
 outputBin='out'
 outputDev='out'
@@ -170,7 +170,7 @@ preConfigurePhases=' updateAutotoolsGnuConfigScriptsPhase'
 declare -a preFixupHooks=('_moveToShare' '_multioutDocs' '_multioutDevs' )
 preferLocalBuild='1'
 export preferLocalBuild
-prefix='/home/lucasgmf/Projects/test/outputs/out'
+prefix='/home/lucasgmf/Projects/SEMB-LED_Tower/outputs/out'
 declare -a propagatedBuildDepFiles=('propagated-build-build-deps' 'propagated-native-build-inputs' 'propagated-build-target-deps' )
 propagatedBuildInputs=''
 export propagatedBuildInputs
