@@ -91,59 +91,54 @@ uint16_t createMaskWithOne(int pos);
 void *displayCube(void *args) {
   CubeSystem *c = (CubeSystem *)args;
 
-  // c->Cube.ledValues[linha][coluna][andar]
-
   uint16_t expanderVal1 = 0xFFFF;
   uint16_t expanderVal2 = 0xFFFF;
   uint16_t expanderVal3 = 0xFFFF;
 
-  time_t startTime = time(NULL);
-  time_t currentTime = time(NULL);
-
-  if (c->Shifter1.data == 0)
+  if (c->Shifter1.data != 1)
     setShifterVal(&c->Shifter1, 1);
 
-  while (c->SystemState != STOP) {
-    // Interate for each floor not considering imaginary floors
-    for (int andar = 0; andar < 12; andar = andar + 2) {
-      // Calculate GPA_ and GPB_ for each floor
-      for (int coluna = 0; coluna < 6; coluna++) {
-        for (int linha = 0; linha < 6; linha++) {
+  // Interate for each floor not considering imaginary floors
+  for (int andar = 0; andar < 12; andar = andar + 2) {
+    // Calculate GPA_ and GPB_ for each floor
+    for (int coluna = 0; coluna < 6; coluna++) {
+      for (int linha = 0; linha < 6; linha++) {
 
-          // Update values for each coluna and linha
-          if (c->LedArray.ledValue[coluna][linha][andar / 2] == true) {
-            if (coluna < 2) {
-              expanderVal1 =
-                  expanderVal1 &
-                  createMaskWithZero(coluna % 2 == 0 ? linha + 8 : linha + 2);
-            } else if (coluna < 4) {
-              expanderVal2 =
-                  expanderVal2 &
-                  createMaskWithZero(coluna % 2 == 0 ? linha + 8 : linha + 2);
-            } else {
-              expanderVal3 =
-                  expanderVal3 &
-                  createMaskWithZero(coluna % 2 == 0 ? linha + 8 : linha + 2);
-            }
+        // Update values for each coluna and linha
+        if (c->LedArray.ledValue[coluna][linha][andar / 2] == true) {
+          if (coluna < 2) {
+            expanderVal1 =
+                expanderVal1 &
+                createMaskWithZero(coluna % 2 == 0 ? linha + 8 : linha + 2);
+          } else if (coluna < 4) {
+            expanderVal2 =
+                expanderVal2 &
+                createMaskWithZero(coluna % 2 == 0 ? linha + 8 : linha + 2);
+          } else {
+            expanderVal3 =
+                expanderVal3 &
+                createMaskWithZero(coluna % 2 == 0 ? linha + 8 : linha + 2);
           }
         }
       }
-      setExpanderVal(&c->Expander1, expanderVal1);
-      setExpanderVal(&c->Expander2, expanderVal2);
-      setExpanderVal(&c->Expander3, expanderVal3);
-
-      usleep(10000 / 10);
-
-      // reset
-      expanderVal1 = 0xFFFF;
-      expanderVal2 = 0xFFFF;
-      expanderVal3 = 0xFFFF;
-
-      setExpanderVal(&c->Expander1, expanderVal1);
-      setExpanderVal(&c->Expander2, expanderVal2);
-      setExpanderVal(&c->Expander3, expanderVal3);
-      goToNextcycle(&c->Shifter1);
     }
+    setExpanderVal(&c->Expander1, expanderVal1);
+    setExpanderVal(&c->Expander2, expanderVal2);
+    setExpanderVal(&c->Expander3, expanderVal3);
+
+    // mantain layer with 1ms
+    usleep(1000);
+
+    // reset
+    expanderVal1 = 0xFFFF;
+    expanderVal2 = 0xFFFF;
+    expanderVal3 = 0xFFFF;
+
+    setExpanderVal(&c->Expander1, expanderVal1);
+    setExpanderVal(&c->Expander2, expanderVal2);
+    setExpanderVal(&c->Expander3, expanderVal3);
+
+    goToNextcycle(&c->Shifter1);
   }
   return nullptr;
 }
