@@ -79,17 +79,17 @@ void goToNextcycle(Shifter *s) {
     s->data = 0b0000'0000'0000'0001;
     // remove 1 from MSB
     digitalWrite(s->dataPin, LOW);
-    clockPulse(s, 10);
+    clockPulse(s, 1);
 
     // add 1 in LSB
     digitalWrite(s->dataPin, HIGH);
-    clockPulse(s, 10);
+    clockPulse(s, 1);
     digitalWrite(s->dataPin, LOW);
     return;
   }
   s->data = s->data << 2;
-  clockPulse(s, 10);
-  clockPulse(s, 10);
+  clockPulse(s, 1);
+  clockPulse(s, 1);
   return;
 }
 
