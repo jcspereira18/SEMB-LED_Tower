@@ -88,9 +88,7 @@ void *systemStateActions(void *args) {
 uint16_t createMaskWithZero(int pos);
 uint16_t createMaskWithOne(int pos);
 
-void *displayCube(void *args) {
-  CubeSystem *c = (CubeSystem *)args;
-
+void displayCube(CubeSystem *c) {
   uint16_t expanderVal1 = 0xFFFF;
   uint16_t expanderVal2 = 0xFFFF;
   uint16_t expanderVal3 = 0xFFFF;
@@ -122,6 +120,7 @@ void *displayCube(void *args) {
         }
       }
     }
+
     setExpanderVal(&c->Expander1, expanderVal1);
     setExpanderVal(&c->Expander2, expanderVal2);
     setExpanderVal(&c->Expander3, expanderVal3);
@@ -140,7 +139,7 @@ void *displayCube(void *args) {
 
     goToNextcycle(&c->Shifter1);
   }
-  return nullptr;
+  return;
 }
 
 void *readButtons(void *args) {
@@ -266,4 +265,60 @@ uint16_t createMaskWithOne(int pos) {
 
   // Create a mask with a single 1 at the given position
   return (uint16_t)(1 << pos);
+}
+
+void newRainAnimation(CubeSystem *c) {
+  for (int i = 0; i < 4; i++) {
+    int x = rand() % 6;
+    int y = rand() % 6;
+    c->LedArray.ledValue[x][y][5] = true;
+  }
+
+  for (int z = 0; z < 5; z++) {
+    for (int x = 0; x < 6; x++) {
+      for (int y = 0; y < 6; y++) {
+        if (c->LedArray.ledValue[x][y][z + 1]) {
+          c->LedArray.ledValue[x][y][z] = true;
+          c->LedArray.ledValue[x][y][z + 1] = false;
+        }
+      }
+    }
+  }
+
+  for (int x = 0; x < 6; x++) {
+    for (int y = 0; y < 6; y++) {
+      if (c->LedArray.ledValue[x][y][0]) {
+        if ((rand() % 100) < (50)) {
+          c->LedArray.ledValue[x][y][0] = false;
+        }
+      }
+    }
+  }
+
+  return;
+}
+
+void *micro1(void *args) {
+  CubeSystem *c = (CubeSystem *)args;
+
+  displayCube(c);
+
+  return nullptr;
+}
+
+void *micro2(void *args) {
+  CubeSystem *c = (CubeSystem *)args;
+
+  newRainAnimation(c);
+  displayCube(c);
+
+  return nullptr;
+}
+
+void *micro3(void *args) {
+  CubeSystem *c = (CubeSystem *)args;
+
+  displayCube(c);
+
+  return nullptr;
 }
