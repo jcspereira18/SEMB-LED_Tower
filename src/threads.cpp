@@ -29,60 +29,57 @@ void *globalReset(void *args) {
   return nullptr;
 }
 
-void *systemStateTransitions(void *args) {
-  CubeSystem *c = (CubeSystem *)args;
+void newFireworksAnimation(CubeSystem *c);
+void newRainAnimation(CubeSystem *c);
+
+void systemStateTransitions(CubeSystem *c) {
 
   int previousState = -1;
   int currentState = -1;
 
-  while (1) {
-    pthread_mutex_lock(&c->StateMutex);
-    currentState = c->SystemState;
-    pthread_mutex_unlock(&c->StateMutex);
+  pthread_mutex_lock(&c->StateMutex);
+  currentState = c->SystemState;
+  pthread_mutex_unlock(&c->StateMutex);
 
-    if (c->Expander2.Button2.state) {
-      c->SystemState = IDLE;
-      /* printf("condition 0 is true\n"); */
-    } else if (c->Expander3.Button1.state) {
-      c->SystemState = RAIN;
-      /* printf("condition 1 is true\n"); */
-    } else if (c->Expander2.Button4.state) {
-      c->SystemState = SNAKE;
-      /* printf("condition 2 is true\n"); */
-    } else if (c->Expander3.Button3.state) {
-      c->SystemState = STOP;
-      /* printf("condition 3 is true\n"); */
-    }
-
-    /* printf("currentState: %d\n", c->SystemState); */
-    pthread_mutex_unlock(&c->StateMutex);
-
-    usleep(250000 / 4);
+  if (c->Expander2.Button2.state) {
+    c->SystemState = IDLE;
+    clearLedValuesArray(&c->LedArray);
+    printf("condition 0 is true\n");
+  } else if (c->Expander3.Button1.state) {
+    clearLedValuesArray(&c->LedArray);
+    c->SystemState = RAIN;
+    printf("condition 1 is true\n");
+  } else if (c->Expander2.Button4.state) {
+    clearLedValuesArray(&c->LedArray);
+    c->SystemState = SNAKE;
+    printf("condition 2 is true\n");
+  } else if (c->Expander3.Button3.state) {
+    clearLedValuesArray(&c->LedArray);
+    c->SystemState = STOP;
+    printf("condition 3 is true\n");
   }
-  return nullptr;
+
+  /* printf("currentState: %d\n", c->SystemState); */
+  pthread_mutex_unlock(&c->StateMutex);
+
+  return;
 }
 
-void *systemStateActions(void *args) {
-  CubeSystem *c = (CubeSystem *)args;
+void systemStateActions(CubeSystem *c) {
+  switch (c->SystemState) {
+  case IDLE:
+    newFireworksAnimation(c);
+    break;
+  case RAIN:
+    newRainAnimation(c);
+    break;
+  case SNAKE:
+    break;
 
-  while (1) {
-    switch (c->SystemState) {
-    case IDLE:
-      fireworksAnimation(&c->LedArray, &c->SystemState);
-      break;
-    case RAIN:
-      rainAnimation(&c->LedArray, &c->SystemState);
-      break;
-    case SNAKE:
-      snakeGame(&c->LedArray, &c->SystemState, c);
-      break;
-
-    default:
-      break;
-    }
-    usleep(100000);
+  default:
+    break;
   }
-  return nullptr;
+  return;
 }
 
 uint16_t createMaskWithZero(int pos);
@@ -142,76 +139,72 @@ void displayCube(CubeSystem *c) {
   return;
 }
 
-void *readButtons(void *args) {
-  CubeSystem *c = (CubeSystem *)args;
+void readButtons(CubeSystem *c) {
 
   uint16_t readingExp1 = 0;
   uint16_t readingExp2 = 0;
   uint16_t readingExp3 = 0;
 
-  while (1) {
-    readingExp1 = readExpander(&c->Expander1);
-    readingExp2 = readExpander(&c->Expander2);
-    readingExp3 = readExpander(&c->Expander3);
+  readingExp1 = readExpander(&c->Expander1);
+  readingExp2 = readExpander(&c->Expander2);
+  readingExp3 = readExpander(&c->Expander3);
 
-    // TODO: update all buttons to use the expanders instead of system
-    // buttons...
-    debounceButton(&c->Expander1.Button1, ~readingExp1 & 0b0100'0000'0000'0000);
-    debounceButton(&c->Expander1.Button2, ~readingExp1 & 0b0000'0000'0000'0010);
-    debounceButton(&c->Expander1.Button3, ~readingExp1 & 0b1000'0000'0000'0000);
-    debounceButton(&c->Expander1.Button4, ~readingExp1 & 0b0000'0000'0000'0001);
-    debounceButton(&c->Expander2.Button1, ~readingExp2 & 0b0100'0000'0000'0000);
-    debounceButton(&c->Expander2.Button2, ~readingExp2 & 0b0000'0000'0000'0010);
-    debounceButton(&c->Expander2.Button3, ~readingExp2 & 0b1000'0000'0000'0000);
-    debounceButton(&c->Expander2.Button4, ~readingExp2 & 0b0000'0000'0000'0001);
-    debounceButton(&c->Expander3.Button1, ~readingExp3 & 0b0100'0000'0000'0000);
-    debounceButton(&c->Expander3.Button2, ~readingExp3 & 0b0000'0000'0000'0010);
-    debounceButton(&c->Expander3.Button3, ~readingExp3 & 0b1000'0000'0000'0000);
-    debounceButton(&c->Expander3.Button4, ~readingExp3 & 0b0000'0000'0000'0001);
+  // TODO: update all buttons to use the expanders instead of system
+  // buttons...
+  debounceButton(&c->Expander1.Button1, ~readingExp1 & 0b0100'0000'0000'0000);
+  debounceButton(&c->Expander1.Button2, ~readingExp1 & 0b0000'0000'0000'0010);
+  debounceButton(&c->Expander1.Button3, ~readingExp1 & 0b1000'0000'0000'0000);
+  debounceButton(&c->Expander1.Button4, ~readingExp1 & 0b0000'0000'0000'0001);
+  debounceButton(&c->Expander2.Button1, ~readingExp2 & 0b0100'0000'0000'0000);
+  debounceButton(&c->Expander2.Button2, ~readingExp2 & 0b0000'0000'0000'0010);
+  debounceButton(&c->Expander2.Button3, ~readingExp2 & 0b1000'0000'0000'0000);
+  debounceButton(&c->Expander2.Button4, ~readingExp2 & 0b0000'0000'0000'0001);
+  debounceButton(&c->Expander3.Button1, ~readingExp3 & 0b0100'0000'0000'0000);
+  debounceButton(&c->Expander3.Button2, ~readingExp3 & 0b0000'0000'0000'0010);
+  debounceButton(&c->Expander3.Button3, ~readingExp3 & 0b1000'0000'0000'0000);
+  debounceButton(&c->Expander3.Button4, ~readingExp3 & 0b0000'0000'0000'0001);
 
-    // enable and disable prints
-    if (0) {
-      if (c->Expander1.Button1.state) {
-        printf("Button 11 is pressed\n");
-      }
-      if (c->Expander1.Button2.state) {
-        printf("Button 12 is pressed\n");
-      }
-      if (c->Expander1.Button3.state) {
-        printf("Button 13 is pressed\n");
-      }
-      if (c->Expander1.Button4.state) {
-        printf("Button 14 is pressed\n");
-      }
-      if (c->Expander2.Button1.state) {
-        printf("Button 21 is pressed\n");
-      }
-      if (c->Expander2.Button2.state) {
-        printf("Button 22 is pressed\n");
-      }
-      if (c->Expander2.Button3.state) {
-        printf("Button 23 is pressed\n");
-      }
-      if (c->Expander2.Button4.state) {
-        printf("Button 24 is pressed\n");
-      }
-      if (c->Expander3.Button1.state) {
-        printf("Button 31 is pressed\n");
-      }
-      if (c->Expander3.Button2.state) {
-        printf("Button 32 is pressed\n");
-      }
-      if (c->Expander3.Button3.state) {
-        printf("Button 33 is pressed\n");
-      }
-      if (c->Expander3.Button4.state) {
-        printf("Button 34 is pressed\n");
-      }
+  // enable and disable prints
+  if (1) {
+    if (c->Expander1.Button1.state) {
+      printf("Button 11 is pressed\n");
     }
-    usleep(100'000 / 6);
+    if (c->Expander1.Button2.state) {
+      printf("Button 12 is pressed\n");
+    }
+    if (c->Expander1.Button3.state) {
+      printf("Button 13 is pressed\n");
+    }
+    if (c->Expander1.Button4.state) {
+      printf("Button 14 is pressed\n");
+    }
+    if (c->Expander2.Button1.state) {
+      printf("Button 21 is pressed\n");
+    }
+    if (c->Expander2.Button2.state) {
+      printf("Button 22 is pressed\n");
+    }
+    if (c->Expander2.Button3.state) {
+      printf("Button 23 is pressed\n");
+    }
+    if (c->Expander2.Button4.state) {
+      printf("Button 24 is pressed\n");
+    }
+    if (c->Expander3.Button1.state) {
+      printf("Button 31 is pressed\n");
+    }
+    if (c->Expander3.Button2.state) {
+      printf("Button 32 is pressed\n");
+    }
+    if (c->Expander3.Button3.state) {
+      printf("Button 33 is pressed\n");
+    }
+    if (c->Expander3.Button4.state) {
+      printf("Button 34 is pressed\n");
+    }
   }
 
-  return nullptr;
+  return;
 }
 
 int getDirectionFromInput(CubeSystem *c) {
@@ -298,10 +291,90 @@ void newRainAnimation(CubeSystem *c) {
   return;
 }
 
+void newFireworksAnimation(CubeSystem *c) {
+  static int phase = 0; // Tracks the current phase of the animation
+  static int start_x, start_y,
+      start_z;                 // Random starting point for firework burst
+  static int radius = 0;       // Current radius of the burst
+  static int sparkleFrame = 0; // Tracks the number of sparkle frames
+
+  // Clear the LED array at the beginning of each phase
+  if (phase == 0) {
+    clearLedValuesArray(&c->LedArray);
+
+    // Generate a random starting point for the firework burst
+    start_x = rand() % 6;
+    start_y = rand() % 6;
+    start_z = rand() % 6;
+
+    // Light up the initial vertical column
+    for (int z = 0; z <= start_z; z++) {
+      c->LedArray.ledValue[start_x][start_y][z] = true;
+    }
+
+    phase = 1; // Move to the radial burst phase
+    return;
+  }
+
+  // Handle the radial burst
+  if (phase == 1) {
+    clearLedValuesArray(
+        &c->LedArray); // Clear the LED array for the current frame
+
+    // Draw the expanding burst
+    for (int x = 0; x < 6; x++) {
+      for (int y = 0; y < 6; y++) {
+        for (int z = 0; z < 6; z++) {
+          int distance = abs(x - start_x) + abs(y - start_y) + abs(z - start_z);
+          if (distance == radius) {
+            c->LedArray.ledValue[x][y][z] = true;
+          }
+        }
+      }
+    }
+
+    radius++; // Increase the radius for the next frame
+
+    if (radius >= 6) {
+      phase = 2;        // Move to the sparkle phase
+      sparkleFrame = 0; // Reset sparkle frame counter
+    }
+    return;
+  }
+
+  // Handle the sparkle effect
+  if (phase == 2) {
+    clearLedValuesArray(
+        &c->LedArray); // Clear the LED array for the current frame
+
+    // Create random sparkles around the starting point
+    for (int j = 0; j < 10; j++) { // Number of sparkles per frame
+      int sparkle_x = start_x + (rand() % 3 - 1); // Random offset -1, 0, 1
+      int sparkle_y = start_y + (rand() % 3 - 1);
+      int sparkle_z = start_z + (rand() % 3 - 1);
+
+      // Ensure the sparkles are within the cube bounds
+      if (sparkle_x >= 0 && sparkle_x < 6 && sparkle_y >= 0 && sparkle_y < 6 &&
+          sparkle_z >= 0 && sparkle_z < 6) {
+        c->LedArray.ledValue[sparkle_x][sparkle_y][sparkle_z] = true;
+      }
+    }
+
+    sparkleFrame++;
+    if (sparkleFrame >= 5) { // After 5 sparkle frames, reset the animation
+      phase = 0;
+      radius = 0;
+    }
+    return;
+  }
+}
+
 void *micro1(void *args) {
   CubeSystem *c = (CubeSystem *)args;
 
   displayCube(c);
+  readButtons(c);
+  systemStateTransitions(c);
 
   return nullptr;
 }
@@ -309,16 +382,15 @@ void *micro1(void *args) {
 void *micro2(void *args) {
   CubeSystem *c = (CubeSystem *)args;
 
-  newRainAnimation(c);
+  readButtons(c);
   displayCube(c);
+  systemStateActions(c);
 
   return nullptr;
 }
 
 void *micro3(void *args) {
   CubeSystem *c = (CubeSystem *)args;
-
-  displayCube(c);
 
   return nullptr;
 }
