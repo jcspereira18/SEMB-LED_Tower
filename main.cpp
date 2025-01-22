@@ -64,7 +64,7 @@ int main() {
   printf("Entering loop.\n");
 
   while (1) {
-    printf("Starting micro1thread\n");
+    /* printf("Starting micro1thread\n"); */
     clock_gettime(CLOCK_MONOTONIC, &currentTime);
     pthread_create(&micro1thread, &displayAttr, micro1, (void *)&c);
     pthread_join(micro1thread, NULL);
@@ -72,17 +72,17 @@ int main() {
 
     ellapsedTimeMs = (currentTime.tv_sec - startTime.tv_sec) * 1000;
     ellapsedTimeMs += (currentTime.tv_nsec - startTime.tv_nsec) / 1'000'000;
-    printf("ellapsedTimeMs: %ld ms.\n", ellapsedTimeMs);
+    /* printf("ellapsedTimeMs: %ld ms.\n", ellapsedTimeMs); */
 
-    if (ellapsedTimeMs < 100) {
-      usleep(100 - ellapsedTimeMs);
-      printf("ellapsedTime is < 100, sleeping for %ld ms.\n",
-             100 - ellapsedTimeMs);
+    if (ellapsedTimeMs < 30) {
+      usleep(30000 - ellapsedTimeMs);
+      /* printf("ellapsedTime is < 30 ms, sleeping for %ld ms.\n", */
+             /* 30 - ellapsedTimeMs); */
       clock_gettime(CLOCK_MONOTONIC, &startTime);
       /* continue; */
     }
 
-    printf("Starting micro2thread\n");
+    /* printf("Starting micro2thread\n"); */
     clock_gettime(CLOCK_MONOTONIC, &currentTime);
     pthread_create(&micro2thread, &displayAttr, micro2, (void *)&c);
     pthread_join(micro2thread, NULL);
@@ -90,17 +90,17 @@ int main() {
 
     ellapsedTimeMs = (currentTime.tv_sec - startTime.tv_sec) * 1000;
     ellapsedTimeMs += (currentTime.tv_nsec - startTime.tv_nsec) / 1'000'000;
-    printf("ellapsedTimeMs: %ld ms.\n", ellapsedTimeMs);
+    /* printf("ellapsedTimeMs: %ld ms.\n", ellapsedTimeMs); */
 
-    if (ellapsedTimeMs < 100) {
-      usleep(100 - ellapsedTimeMs);
-      printf("ellapsedTime is < 100, sleeping for %ld ms.\n",
-             100 - ellapsedTimeMs);
+    if (ellapsedTimeMs < 30) {
+      usleep(30000 - ellapsedTimeMs);
+      /* printf("ellapsedTime is < 30 ms, sleeping for %ld ms.\n", */
+             /* 30 - ellapsedTimeMs); */
       clock_gettime(CLOCK_MONOTONIC, &startTime);
       /* continue; */
     }
 
-    printf("Starting micro3thread\n");
+    /* printf("Starting micro3thread\n"); */
     clock_gettime(CLOCK_MONOTONIC, &currentTime);
     pthread_create(&micro3thread, &displayAttr, micro3, (void *)&c);
     pthread_join(micro3thread, NULL);
@@ -108,18 +108,14 @@ int main() {
 
     ellapsedTimeMs = (currentTime.tv_sec - startTime.tv_sec) * 1000;
     ellapsedTimeMs += (currentTime.tv_nsec - startTime.tv_nsec) / 1'000'000;
-    printf("ellapsedTimeMs: %ld ms.\n", ellapsedTimeMs);
+    /* printf("ellapsedTimeMs: %ld ms.\n", ellapsedTimeMs); */
 
-    if (ellapsedTimeMs < 100) {
-      usleep(100 - ellapsedTimeMs);
-      printf("ellapsedTime is < 100, sleeping for %ld ms.\n",
-             100 - ellapsedTimeMs);
+    if (ellapsedTimeMs < 30) {
+      /* usleep(30000 - ellapsedTimeMs); */
+      /* printf("ellapsedTime is < 30 ms, sleeping for %ld ms.\n", */
+             /* 30 - ellapsedTimeMs); */
       clock_gettime(CLOCK_MONOTONIC, &startTime);
       continue;
-    }
-    if (ellapsedTimeMs >= 100) {
-      printf("Breaking loop, ellapsedTimeMs is %ld ms.\n", ellapsedTimeMs);
-      break;
     }
   }
 
