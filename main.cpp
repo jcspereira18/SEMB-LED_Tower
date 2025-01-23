@@ -47,12 +47,22 @@ int main() {
   // Runs once
   // WARN: one-shot thread!
 
+  struct timespec start, end;
+  double execTime = 0;
+
+  clock_gettime(CLOCK_MONOTONIC, &start);
   if (pthread_create(&initCubeSystemThread, &initAttributes, createCubeSystem,
                      (void *)&c) != 0) {
     printf("[ERROR] - Cannot create initCubeSystemThread\n");
     exit(EXIT_FAILURE);
   }
   pthread_join(initCubeSystemThread, NULL);
+  clock_gettime(CLOCK_MONOTONIC, &end);
+
+  execTime =
+      (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1.0e6;
+
+  printf("createCubeSystem had the following time: %.6f ms\n", execTime);
 
   struct timespec loopStart, loopEnd, lastExec3, currentTime;
   double loopTime = 0;
@@ -61,7 +71,6 @@ int main() {
   clock_gettime(CLOCK_MONOTONIC, &lastExec3);
 
   while (c.SystemState != STOP) {
-
     clock_gettime(CLOCK_MONOTONIC, &loopStart);
     clock_gettime(CLOCK_MONOTONIC, &currentTime);
 
@@ -85,10 +94,10 @@ int main() {
     loopTime = (loopEnd.tv_sec - loopStart.tv_sec) +
                (loopEnd.tv_nsec - loopStart.tv_nsec) / 1.0e9;
 
-    if (loopTime < 0.025) {
+    if (loopTime < 0.030) {
       printf("loopTime: %.6f\n", loopTime);
-      printf("Sleeping for: %.6f seconds\n", (0.025 - loopTime));
-      usleep((0.025 - loopTime) * 1e6);
+      printf("Sleeping for: %.6f seconds\n", (0.030 - loopTime));
+      usleep((0.030 - loopTime) * 1e6);
     }
   }
 
