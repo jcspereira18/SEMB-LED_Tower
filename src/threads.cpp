@@ -380,10 +380,7 @@ void newFireworksAnimation(CubeSystem *c) {
 void *micro1(void *args) {
   CubeSystem *c = (CubeSystem *)args;
 
-  /* displayCube(c); */
-  readButtons(c);
-  /* updateSnakeDirection(c); */
-  /* systemStateTransitions(c); */
+  displayCube(c);
 
   return nullptr;
 }
@@ -391,8 +388,8 @@ void *micro1(void *args) {
 void *micro2(void *args) {
   CubeSystem *c = (CubeSystem *)args;
 
-  /* displayCube(c); */
-  /* systemStateActions(c); */
+  readButtons(c);
+  updateSnakeDirection(c);
   systemStateTransitions(c);
 
   return nullptr;
@@ -402,12 +399,5 @@ void *micro3(void *args) {
   CubeSystem *c = (CubeSystem *)args;
 
   systemStateActions(c);
-  return nullptr;
-}
-
-void *micro4(void *args) {
-  CubeSystem *c = (CubeSystem *)args;
-
-  displayCube(c);
   return nullptr;
 }
