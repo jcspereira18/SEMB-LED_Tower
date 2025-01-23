@@ -27,10 +27,16 @@ void *displayCube(void *args);
  * @brief Update led array to create rain effect.
  */
 
+void readButtons(CubeSystem *c);
 
-void *readButtons(void *args);
+void systemStateTransitions(CubeSystem *c);
+void systemStateActions(CubeSystem *c);
 
-void *systemStateTransitions(void *args);
-void *systemStateActions(void *args);
 void *updateSnakeDirection(void *arg);
+void *newRainAnimation(void *arg);
+
+void *micro1(void *args);
+void *micro2(void *args);
+void *micro3(void *args);
+void *micro4(void *args);
 #endif // THREADS_HPP

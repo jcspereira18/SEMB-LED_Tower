@@ -5,11 +5,11 @@
 #include "include/components/init_comp.hpp"
 #include "include/threads.hpp"
 
+void sync(timespec startTime);
 
 int main() {
-  CubeSystem c; // System struct
+  CubeSystem c;
 
-  // Scheduliing attributes
   pthread_attr_t initAttributes;
   pthread_attr_t displayAttr;
   pthread_attr_t RRthreads;
@@ -38,62 +38,70 @@ int main() {
   pthread_attr_setinheritsched(&displayAttr, PTHREAD_EXPLICIT_SCHED);
   pthread_attr_setinheritsched(&RRthreads, PTHREAD_EXPLICIT_SCHED);
 
-  // Initialize Cube system
   pthread_t initCubeSystemThread;
+  pthread_t micro1thread;
+  pthread_t micro2thread;
+  pthread_t micro3thread;
+  pthread_t micro4thread;
+  // Hardware initialization
+  // Runs once
+  // WARN: one-shot thread!
+
+  struct timespec start, end;
+  double execTime = 0;
+
+  clock_gettime(CLOCK_MONOTONIC, &start);
   if (pthread_create(&initCubeSystemThread, &initAttributes, createCubeSystem,
                      (void *)&c) != 0) {
     printf("[ERROR] - Cannot create initCubeSystemThread\n");
     exit(EXIT_FAILURE);
   }
   pthread_join(initCubeSystemThread, NULL);
+  clock_gettime(CLOCK_MONOTONIC, &end);
 
-  // Update led display
-  pthread_t displayCubeThread;
-  if (pthread_create(&displayCubeThread, &displayAttr, displayCube, (void *)&c) !=
-      0) {
-    printf("[ERROR] - Cannot create displayCube\n");
-    exit(EXIT_FAILURE);
+  execTime =
+      (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1.0e6;
+
+  printf("createCubeSystem had the following time: %.6f ms\n", execTime);
+
+  struct timespec loopStart, loopEnd, lastExec3, currentTime;
+  double loopTime = 0;
+  double exec3Time = 0;
+
+  clock_gettime(CLOCK_MONOTONIC, &lastExec3);
+
+  while (c.SystemState != STOP) {
+    clock_gettime(CLOCK_MONOTONIC, &loopStart);
+    clock_gettime(CLOCK_MONOTONIC, &currentTime);
+
+    pthread_create(&micro1thread, &displayAttr, micro1, (void *)&c);
+    pthread_create(&micro2thread, &RRthreads, micro2, (void *)&c);
+
+    exec3Time = (currentTime.tv_sec - lastExec3.tv_sec) +
+                (currentTime.tv_nsec - lastExec3.tv_nsec) / 1.0e9;
+
+    if (exec3Time >= 0.15) {
+      pthread_create(&micro3thread, &RRthreads, micro3, (void *)&c);
+      pthread_join(micro3thread, NULL);
+      clock_gettime(CLOCK_MONOTONIC, &lastExec3);
+    }
+
+    pthread_join(micro1thread, NULL);
+    pthread_join(micro2thread, NULL);
+
+    clock_gettime(CLOCK_MONOTONIC, &loopEnd);
+
+    loopTime = (loopEnd.tv_sec - loopStart.tv_sec) +
+               (loopEnd.tv_nsec - loopStart.tv_nsec) / 1.0e9;
+
+    if (loopTime < 0.030) {
+      printf("loopTime: %.6f\n", loopTime);
+      printf("Sleeping for: %.6f seconds\n", (0.030 - loopTime));
+      usleep((0.030 - loopTime) * 1e6);
+    }
   }
 
-  // read Buttons
-  pthread_t readButtonsThread;
-  if (pthread_create(&readButtonsThread, &RRthreads, readButtons, (void *)&c) !=
-      0) {
-    printf("[ERROR] - Cannot create readButtonsThread\n");
-    exit(EXIT_FAILURE);
-  }
-
-  pthread_t updateSnakeDirectionsThreads;
-  if (pthread_create(&updateSnakeDirectionsThreads, &RRthreads,
-                     updateSnakeDirection, (void *)&c) != 0) {
-    printf("[ERROR] - Cannot create updateSnakeDirectionsThreads\n");
-    exit(EXIT_FAILURE);
-  }
-
-  pthread_t systemTransitionsThread;
-  if (pthread_create(&systemTransitionsThread, &RRthreads,
-                     systemStateTransitions, (void *)&c) != 0) {
-    printf("[ERROR] - Cannot create readButtonsThread\n");
-    exit(EXIT_FAILURE);
-  }
-
-  pthread_t systemActionsThread;
-  if (pthread_create(&systemTransitionsThread, &RRthreads, systemStateActions,
-                     (void *)&c) != 0) {
-    printf("[ERROR] - Cannot create systemActionsThread\n");
-    exit(EXIT_FAILURE);
-  }
-
-  pthread_join(displayCubeThread, NULL);
-
-  // reset expanders and shifters to exit program
-  pthread_t resetThread;
-  if (pthread_create(&resetThread, NULL, globalReset, (void *)&c) != 0) {
-    printf("[ERROR] - Cannot create resetThread\n");
-    exit(EXIT_FAILURE);
-  }
-  pthread_join(resetThread, NULL);
-
+  // Cleanup before ending process
   pthread_attr_destroy(&initAttributes);
   pthread_attr_destroy(&RRthreads);
 

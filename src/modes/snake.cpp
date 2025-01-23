@@ -104,99 +104,100 @@ void blinkFood(LedValues *l, int food_x, int food_y, int food_z, int state) {
 }
 
 void snakeGame(LedValues *l, SystemStates *state, CubeSystem *c) {
-  SnakeQueue snakeQueue;
-  initSnakeQueue(&snakeQueue);
-  int snake[6][6][6] = {0}; // 3D array to track snake positions
-  int head_x, head_y, head_z, length;
-  int food_x, food_y, food_z;
+  static SnakeQueue snakeQueue;
+  static int snake[6][6][6] = {0}; // 3D array to track snake positions
+  static int head_x, head_y, head_z, length;
+  static int food_x, food_y, food_z;
+  static int direction = 0; // Initial direction: 0 (+x)
+  static int foodState = 1; // Tracks the blinking state of the food
+  static bool initialized = false;
 
-  // Initialize game state
-  resetGame(l, &snakeQueue, snake, &head_x, &head_y, &head_z, &length, &food_x,
-            &food_y, &food_z);
-
-  int direction = 0; // Initial direction: 0 (+x)
-  int foodState = 1; // Tracks the blinking state of the food
-  while (*state == SNAKE) {
-    // Blink the food
-    blinkFood(l, food_x, food_y, food_z, foodState);
-    foodState = !foodState;
-
-    // Get direction input using your provided function
-    direction = c->SnakeDirection;
-
-    // Calculate the new head position based on direction
-    int new_x = head_x, new_y = head_y, new_z = head_z;
-    switch (direction) {
-    case 0:
-      new_x++;
-      break; // +x
-    case 1:
-      new_x--;
-      break; // -x
-    case 2:
-      new_y--;
-      break; // -y
-    case 3:
-      new_y++;
-      break; // +y
-    case 4:
-      new_z++;
-      break; // +z
-    case 5:
-      new_z--;
-      break; // -z
-    }
-
-    // Check for collision with walls or snake body
-    if (new_x < 0 || new_x >= 6 || new_y < 0 || new_y >= 6 || new_z < 0 ||
-        new_z >= 6 || snake[new_x][new_y][new_z] != 0) {
-
-      // Blink the snake 3 times
-      blinkSnake(l, &snakeQueue, 3, 500);
-
-      while (1) {
-        if (TRUE) { // Placeholder for input detection
-          break;
-        }
-        usleep(100000); // Polling delay
-      }
-
-      // Reset the game state
-      resetGame(l, &snakeQueue, snake, &head_x, &head_y, &head_z, &length,
-                &food_x, &food_y, &food_z);
-      foodState = 1; // Reset the food blinking state
-      continue;
-    }
-
-    // Check for food
-    if (new_x == food_x && new_y == food_y && new_z == food_z) {
-      length++; // Grow the snake
-
-      // Generate new food position
-      do {
-        food_x = rand() % 6;
-        food_y = rand() % 6;
-        food_z = rand() % 6;
-      } while (snake[food_x][food_y][food_z] != 0);
-      l->ledValue[food_x][food_y][food_z] = true;
-
-    } else {
-      // Remove the tail if no food was eaten
-      Position tail = dequeue(&snakeQueue);
-      snake[tail.x][tail.y][tail.z] = 0; // Clear the tail in the array
-      l->ledValue[tail.x][tail.y][tail.z] = false; // Turn off the tail LED
-    }
-
-    // Update the head
-    head_x = new_x;
-    head_y = new_y;
-    head_z = new_z;
-    snake[head_x][head_y][head_z] = length; // Place the new head in the array
-    l->ledValue[head_x][head_y][head_z] = true; // Turn on the head LED
-    Position head = {head_x, head_y, head_z};
-    enqueue(&snakeQueue, head);
-
-    // Delay to control game speed
-    sleep(1);
+  // Initialize game state once
+  if (!initialized) {
+    initSnakeQueue(&snakeQueue);
+    resetGame(l, &snakeQueue, snake, &head_x, &head_y, &head_z, &length,
+              &food_x, &food_y, &food_z);
+    initialized = true;
   }
+
+  // Blink the food for the current frame
+  blinkFood(l, food_x, food_y, food_z, foodState);
+  foodState = !foodState;
+
+  // Get direction input
+  direction = c->SnakeDirection;
+
+  // Calculate the new head position based on direction
+  int new_x = head_x, new_y = head_y, new_z = head_z;
+  switch (direction) {
+  case 0:
+    new_x++;
+    break; // +x
+  case 1:
+    new_x--;
+    break; // -x
+  case 2:
+    new_y--;
+    break; // -y
+  case 3:
+    new_y++;
+    break; // +y
+  case 4:
+    new_z++;
+    break; // +z
+  case 5:
+    new_z--;
+    break; // -z
+  }
+
+  // Check for collision with walls or snake body
+  if (new_x < 0 || new_x >= 6 || new_y < 0 || new_y >= 6 || new_z < 0 ||
+      new_z >= 6 || snake[new_x][new_y][new_z] != 0) {
+
+    // Blink the snake 3 times (non-blocking)
+    static int blinkCounter = 0;
+    if (blinkCounter < 6) {               // Blink 3 times (on + off)
+      blinkSnake(l, &snakeQueue, 1, 100); // One blink per frame
+      blinkCounter++;
+      return; // Exit for this frame
+    }
+
+    // Reset the game state
+    blinkCounter = 0;
+    resetGame(l, &snakeQueue, snake, &head_x, &head_y, &head_z, &length,
+              &food_x, &food_y, &food_z);
+    foodState = 1; // Reset the food blinking state
+    return;        // Exit for this frame
+  }
+
+  // Check for food
+  if (new_x == food_x && new_y == food_y && new_z == food_z) {
+    length++; // Grow the snake
+
+    // Generate new food position
+    do {
+      food_x = rand() % 6;
+      food_y = rand() % 6;
+      food_z = rand() % 6;
+    } while (snake[food_x][food_y][food_z] != 0);
+    l->ledValue[food_x][food_y][food_z] = true;
+
+  } else {
+    // Remove the tail if no food was eaten
+    Position tail = dequeue(&snakeQueue);
+    snake[tail.x][tail.y][tail.z] = 0;           // Clear the tail in the array
+    l->ledValue[tail.x][tail.y][tail.z] = false; // Turn off the tail LED
+  }
+
+  // Update the head
+  head_x = new_x;
+  head_y = new_y;
+  head_z = new_z;
+  snake[head_x][head_y][head_z] = length;     // Place the new head in the array
+  l->ledValue[head_x][head_y][head_z] = true; // Turn on the head LED
+  Position head = {head_x, head_y, head_z};
+  enqueue(&snakeQueue, head);
+
+  // Exit without delay for frame-by-frame operation
+  return;
 }

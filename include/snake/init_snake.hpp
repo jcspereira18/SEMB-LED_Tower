@@ -28,5 +28,6 @@ typedef struct {
 
 void initializeGame(LedValues *c, Snake *s, Food *f);
 void moveSnake(LedValues *c, Snake *s, Food *f, int direction);
+void snakeGame(LedValues *l, SystemStates *state, CubeSystem *c);
 
 #endif // INIT_SNAKE_HPP
