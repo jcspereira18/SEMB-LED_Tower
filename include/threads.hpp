@@ -38,4 +38,5 @@ void *newRainAnimation(void *arg);
 void *micro1(void *args);
 void *micro2(void *args);
 void *micro3(void *args);
+void *micro4(void *args);
 #endif // THREADS_HPP
