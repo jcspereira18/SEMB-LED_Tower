@@ -399,5 +399,6 @@ void *micro3(void *args) {
   CubeSystem *c = (CubeSystem *)args;
 
   systemStateActions(c);
+
   return nullptr;
 }
