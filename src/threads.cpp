@@ -44,19 +44,19 @@ void systemStateTransitions(CubeSystem *c) {
   if (c->Expander2.Button2.state) {
     c->SystemState = IDLE;
     clearLedValuesArray(&c->LedArray);
-    printf("condition 0 is true\n");
+    /* printf("condition 0 is true\n"); */
   } else if (c->Expander3.Button1.state) {
     clearLedValuesArray(&c->LedArray);
     c->SystemState = RAIN;
-    printf("condition 1 is true\n");
+    /* printf("condition 1 is true\n"); */
   } else if (c->Expander2.Button4.state) {
     clearLedValuesArray(&c->LedArray);
     c->SystemState = SNAKE;
-    printf("condition 2 is true\n");
+    /* printf("condition 2 is true\n"); */
   } else if (c->Expander3.Button3.state) {
     clearLedValuesArray(&c->LedArray);
     c->SystemState = STOP;
-    printf("condition 3 is true\n");
+    /* printf("condition 3 is true\n"); */
   }
 
   /* printf("currentState: %d\n", c->SystemState); */
@@ -66,20 +66,32 @@ void systemStateTransitions(CubeSystem *c) {
 }
 
 void systemStateActions(CubeSystem *c) {
+  static time_t lastSnakeExecutionTime =
+      0; // Tracks last execution time for SNAKE
+  time_t currentTime;
+
+  // Get the current time (UNIX timestamp, seconds)
+  time(&currentTime);
+
   switch (c->SystemState) {
   case IDLE:
-    newFireworksAnimation(c);
+    newFireworksAnimation(c); // Always runs immediately
     break;
+
   case RAIN:
-    newRainAnimation(c);
+    newRainAnimation(c); // Always runs immediately
     break;
+
   case SNAKE:
+    if (currentTime - lastSnakeExecutionTime >= 1) {
+      lastSnakeExecutionTime = currentTime; // Update the last execution time
+      snakeGame(&c->LedArray, &c->SystemState, c);
+    }
     break;
 
   default:
     break;
   }
-  return;
 }
 
 uint16_t createMaskWithZero(int pos);
@@ -165,7 +177,7 @@ void readButtons(CubeSystem *c) {
   debounceButton(&c->Expander3.Button4, ~readingExp3 & 0b0000'0000'0000'0001);
 
   // enable and disable prints
-  if (1) {
+  if (FALSE) {
     if (c->Expander1.Button1.state) {
       printf("Button 11 is pressed\n");
     }
@@ -224,19 +236,15 @@ int getDirectionFromInput(CubeSystem *c) {
     return -1; // No button pressed
 }
 
-void *updateSnakeDirection(void *arg) {
-  CubeSystem *c = (CubeSystem *)arg;
+void updateSnakeDirection(CubeSystem *c) {
+  int newDirection = getDirectionFromInput(c);
 
-  while (true) {
-    int newDirection = getDirectionFromInput(c);
-
-    if (newDirection != -1) { // Update only if a button is pressed
-      pthread_mutex_lock(&c->directionMutex);
-      c->SnakeDirection = newDirection;
-      pthread_mutex_unlock(&c->directionMutex);
-    }
+  if (newDirection != -1) { // Update only if a button is pressed
+    pthread_mutex_lock(&c->directionMutex);
+    c->SnakeDirection = newDirection;
+    pthread_mutex_unlock(&c->directionMutex);
   }
-  return nullptr;
+  return;
 }
 // Auxiliar functions
 
@@ -374,6 +382,7 @@ void *micro1(void *args) {
 
   displayCube(c);
   readButtons(c);
+  updateSnakeDirection(c);
   systemStateTransitions(c);
 
   return nullptr;
@@ -382,7 +391,6 @@ void *micro1(void *args) {
 void *micro2(void *args) {
   CubeSystem *c = (CubeSystem *)args;
 
-  readButtons(c);
   displayCube(c);
   systemStateActions(c);
 
