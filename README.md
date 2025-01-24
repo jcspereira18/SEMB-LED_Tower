@@ -6,8 +6,6 @@ This project is an interactive 3D LED cube display, developed by **Group D** (Di
 ## Video
 [![Video Title](https://github.com/user-attachments/assets/a8bb5b27-618a-4bfc-8250-3e206204c1b6)](https://youtu.be/f7YsEhxgNT4)
 
-
-
 ## Vision
 Our goal is to create an interactive LED cube that showcases visual animations in a 3D grid format. By controlling each LED individually, we can generate diverse effects, from basic patterns to intricate 3D animations. This project blends hardware integration and software development to enable smooth, real-time transitions and responsive user interactions.
 
@@ -38,5 +36,18 @@ The software manages:
 
 ## Usage
 1. **Setup**: Connect the Raspberry Pi to the LED matrix.
-2. **Launch**: Run the control software on the Raspberry Pi to initialize the LED cube.
-3. **Interaction**: Use the physical buttons to switch between different animations and adjust settings as needed.
+2. **Launch**: Update the IP address of the Raspberry Pi and run the following:
+```bash
+# Create directories at /home/pi and copy files using scp
+make sends
+
+# compile source files using rapsberry pi's own compiler
+make compiles
+
+# execute program with sudo privilegies
+make runs
+
+# or run previous 3 commands
+make alls
+```
+3. **Enjoy!**
