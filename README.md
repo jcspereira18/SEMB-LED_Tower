@@ -1,7 +1,7 @@
 # 3D LED Cube Display Project
 
 ## Overview
-This project is an interactive 3D LED cube display, developed by **Group D** (Diogo Chaves, Joana Pereira, Lucas Freitas) as part of an embedded systems course. The system uses a 6x6x6 LED matrix controlled by a Raspberry Pi 4 to produce dynamic animations and patterns. The cube's LEDs can create complex visual effects, allowing user-selected animations via physical buttons.
+This project is an interactive 3D LED cube display, developed by **Group D** (Diogo Chaves, Joana Pereira and Lucas Freitas) as part of an embedded systems course. The system uses a 6x6x6 LED matrix controlled by a Raspberry Pi 4 to produce dynamic animations and patterns. The cube's LEDs can create complex visual effects, allowing user-selected animations via physical buttons.
 
 ## Video
 [![Video Title](https://github.com/user-attachments/assets/a8bb5b27-618a-4bfc-8250-3e206204c1b6)](https://youtu.be/f7YsEhxgNT4)
