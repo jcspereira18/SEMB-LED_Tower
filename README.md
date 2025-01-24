@@ -36,7 +36,7 @@ The software manages:
 
 ## Usage
 1. **Setup**: Connect the Raspberry Pi to the LED matrix.
-2. **Launch**: Update the IP address of the Raspberry Pi and run the following:
+2. **Launch**: Update the IP address of the Raspberry Pi in the makefile and run the following:
 ```bash
 # Create directories at /home/pi and copy files using scp
 make sends
